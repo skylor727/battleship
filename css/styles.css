@@ -1,0 +1,32 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Alfa Slab One", cursive;
+  background-color: #EEF2FF;
+}
+h1 {
+  text-align: center;
+}
+.player-board-section {
+  display: grid;
+  grid-template-columns: repeat(11, 40px);
+  grid-template-rows: repeat(11, 40px);
+  justify-content: center;
+}
+.cpu-board-section {
+    display: grid;
+    grid-template-columns: repeat(11, 40px);
+    grid-template-rows: repeat(11, 40px);
+    justify-content: center;
+  }
+.board {
+  background-color: #EEF2FF;
+  border: 2px solid #191919;
+}
+
+.board-wrapper {
+    display:flex;
+    justify-content: space-between;
+}
