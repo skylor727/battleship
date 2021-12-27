@@ -9,16 +9,20 @@ body {
 h1 {
   text-align: center;
 }
+header {
+    display:flex;
+    justify-content: space-between;
+}
 .player-board-section {
   display: grid;
-  grid-template-columns: repeat(11, 40px);
-  grid-template-rows: repeat(11, 40px);
+  grid-template-columns: repeat(11, 50px);
+  grid-template-rows: repeat(11, 50px);
   justify-content: center;
 }
 .cpu-board-section {
     display: grid;
-    grid-template-columns: repeat(11, 40px);
-    grid-template-rows: repeat(11, 40px);
+    grid-template-columns: repeat(11, 50px);
+    grid-template-rows: repeat(11, 50px);
     justify-content: center;
   }
 .board {
