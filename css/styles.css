@@ -4,33 +4,48 @@
 
 body {
   font-family: "Alfa Slab One", cursive;
-  background-color: #EEF2FF;
+  background-color: #eef2ff;
 }
 h1 {
   text-align: center;
 }
 header {
-    display:flex;
-    justify-content: space-between;
+  display: flex;
+  font-size: x-large;
+  justify-content: space-around;
 }
 .player-board-section {
   display: grid;
-  grid-template-columns: repeat(11, 50px);
+  grid-template-columns: repeat(10, 50px);
   grid-template-rows: repeat(11, 50px);
   justify-content: center;
+  text-align: center;
 }
 .cpu-board-section {
-    display: grid;
-    grid-template-columns: repeat(11, 50px);
-    grid-template-rows: repeat(11, 50px);
-    justify-content: center;
-  }
+  display: grid;
+  grid-template-columns: repeat(10, 50px);
+  grid-template-rows: repeat(11, 50px);
+  justify-content: center;
+  text-align: center;
+}
+
 .board {
-  background-color: #EEF2FF;
+  background-color: #eef2ff;
   border: 2px solid #191919;
 }
 
 .board-wrapper {
-    display:flex;
-    justify-content: space-between;
+  display: flex;
+  justify-content: space-around;
+}
+.active-ship {
+  background-color: blue;
+}
+
+.hit-ship {
+  background-color: orange;
+}
+
+.sunken-ship {
+  background-color: red;
 }
