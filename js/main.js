@@ -127,7 +127,6 @@ function renderShips(board) {
   placeShips(board, rows, columns, "horizontal", PLAYER_SHIPS.aircraftCarrier);
 }
 
-
 function handleMove(evt) {}
 
 function canBePlaced(board, rows, columns, vertOrHoriz, ship) {
@@ -147,8 +146,7 @@ function canBePlaced(board, rows, columns, vertOrHoriz, ship) {
 function placeShips(board, rows, columns, vertOrHoriz, ship) {
   if (vertOrHoriz === "horizontal") {
     for (let i = columns; i < columns + ship.length; i++) {
-      
-      playerDivs[i + LENGTH + rows].classList.add("active-ship");
+      playerDivs[rows * length + i].classList.add("active-ship");
       board[rows][i] = 1;
     }
   } else {
