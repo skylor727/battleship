@@ -159,12 +159,16 @@ function canBePlaced(board, rows, columns, vertOrHoriz, ship) {
 function placeShips(board, rows, columns, vertOrHoriz, ship) {
   if (vertOrHoriz === "horizontal") {
     for (let i = columns; i < columns + ship.length; i++) {
-      board === PLAYER_BOARD ? playerDivs[rows * LENGTH + i].classList.add("active-ship") : cpuDivs[rows * LENGTH + i].classList.add("active-ship")
+      board === PLAYER_BOARD
+        ? playerDivs[rows * LENGTH + i].classList.add("active-ship")
+        : cpuDivs[rows * LENGTH + i].classList.add("active-ship");
       board[rows][i] = 1;
     }
   } else {
     for (let i = rows; i < rows + ship.length; i++) {
-      board === PLAYER_BOARD ? playerDivs[rows * LENGTH + i].classList.add("active-ship") : cpuDivs[rows * LENGTH + i].classList.add("active-ship")
+      board === PLAYER_BOARD
+        ? playerDivs[i * LENGTH + columns].classList.add("active-ship")
+        : cpuDivs[i * LENGTH + columns].classList.add("active-ship");
       board[i][columns] = 1;
     }
   }
