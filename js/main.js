@@ -1,6 +1,5 @@
 /*----- constants -----*/
 
-
 const PLAYER_BOARD = [
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -55,6 +54,30 @@ const PLAYER_SHIPS = {
   },
 };
 
+const CPU_SHIPS = {
+  aircraftCarrier: {
+    length: 5,
+  },
+  battleship: {
+    length: 4,
+  },
+
+  cruiser: {
+    length: 3,
+  },
+  firstDestroyer: {
+    length: 3,
+  },
+  secondDestroyer: {
+    length: 3,
+  },
+  firstSubmarine: {
+    length: 2,
+  },
+  secondSubmarine: {
+    length: 2,
+  },
+};
 /*----- app's state (variables) -----*/
 
 /*----- cached element references -----*/
@@ -71,6 +94,7 @@ function render() {
   createBoard("player");
   createBoard("cpu");
   renderShips(PLAYER_BOARD);
+  
 }
 
 function createBoard(str) {
@@ -79,7 +103,6 @@ function createBoard(str) {
       const div = document.createElement("DIV");
       div.innerHTML = "";
       //Used to start at row A and increment to the next character in the alphabet
-      //NEED TO ADD NEW-LINE CLASS TO ANY IDX ENDING IN 0
       div.className = `board ${String.fromCharCode(
         "a".charCodeAt(0) + innerIdx
       )}${outerIdx + 1}`;
@@ -94,25 +117,28 @@ function createBoard(str) {
     });
   });
 }
-//if class includes new-line put it on previous idx
+
 function renderShips(board) {
   let shipCanBePlaced;
   let rows;
   let columns;
-
-  do {
-    rows = getRandomNum(0, HEIGHT);
-    columns = getRandomNum(0, LENGTH);
-
-    shipCanBePlaced = canBePlaced(
-      board,
-      rows,
-      columns,
-      "horizontal",
-      PLAYER_SHIPS.aircraftCarrier
-    );
-  } while (!shipCanBePlaced);
-  placeShips(board, rows, columns, "horizontal", PLAYER_SHIPS.aircraftCarrier);
+  let idx = Math.round(Math.random());
+  const vertOrHoriz = ["vertical", "horizontal"];
+  Object.values(PLAYER_SHIPS).forEach((shipObj) => {
+    do {
+      rows = getRandomNum(0, HEIGHT);
+      columns = getRandomNum(0, LENGTH);
+      shipCanBePlaced = canBePlaced(
+        board,
+        rows,
+        columns,
+        vertOrHoriz[idx],
+        shipObj
+      );
+    } while (!shipCanBePlaced);
+    placeShips(board, rows, columns, vertOrHoriz[idx], shipObj);
+    idx = Math.round(Math.random());
+  });
 }
 
 function handleMove(evt) {}
@@ -133,7 +159,6 @@ function canBePlaced(board, rows, columns, vertOrHoriz, ship) {
 function placeShips(board, rows, columns, vertOrHoriz, ship) {
   if (vertOrHoriz === "horizontal") {
     for (let i = columns; i < columns + ship.length; i++) {
-    
       playerDivs[rows * LENGTH + i].classList.add("active-ship");
       board[rows][i] = 1;
     }
