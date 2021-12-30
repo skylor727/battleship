@@ -11,7 +11,6 @@ const boardDivs = [
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  
 ];
 
 const PLAYER_BOARD = [
@@ -40,15 +39,34 @@ const CPU_BOARD = [
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 ];
 
+const LENGTH = CPU_BOARD[0].length;
+const HEIGHT = CPU_BOARD.length;
+
 const PLAYER_SHIPS = {
-  aircraftCarrier: [1, 1, 1, 1, 1],
-  battleship: [1, 1, 1, 1],
-  cruiser: [1, 1, 1],
-  firstDestroyer: [1, 1, 1],
-  secondDestroyer: [1, 1, 1],
-  firstSubmarine: [1, 1],
-  secondSubmarine: [1, 1] //22
+  aircraftCarrier: {
+    length: 5,
+  },
+  battleship: {
+    length: 4,
+  },
+
+  cruiser: {
+    length: 3,
+  },
+  firstDestroyer: {
+    length: 3,
+  },
+  secondDestroyer: {
+    length: 3,
+  },
+  firstSubmarine: {
+    length: 2,
+  },
+  secondSubmarine: {
+    length: 2,
+  },
 };
+
 /*----- app's state (variables) -----*/
 
 /*----- cached element references -----*/
@@ -64,7 +82,7 @@ render();
 function render() {
   createBoard("player");
   createBoard("cpu");
-  renderShips();
+  renderShips(PLAYER_BOARD);
 }
 
 function createBoard(str) {
@@ -73,6 +91,7 @@ function createBoard(str) {
       const div = document.createElement("DIV");
       div.innerHTML = "";
       //Used to start at row A and increment to the next character in the alphabet
+      //NEED TO ADD NEW-LINE CLASS TO ANY IDX ENDING IN 0
       div.className = `board ${String.fromCharCode(
         "a".charCodeAt(0) + innerIdx
       )}${outerIdx + 1}`;
@@ -87,22 +106,58 @@ function createBoard(str) {
     });
   });
 }
+//if class includes new-line put it on previous idx
+function renderShips(board) {
+  let shipCanBePlaced;
+  let rows;
+  let columns;
 
-function renderShips() {
-  let randomDiv;
+  do {
+    rows = getRandomNum(0, HEIGHT);
+    columns = getRandomNum(0, LENGTH);
 
-  Object.values(PLAYER_SHIPS).forEach((arrEl) => {
-    randomDiv = Math.floor(Math.random() * playerDivs.length);
-    if (randomDiv + arrEl.length >= playerDivs.length) randomDiv -= arrEl.length;
-    arrEl.forEach( () => {
-      console.log(playerDivs[randomDiv]);
-      playerDivs[randomDiv].classList.add("active-ship");
-      playerDivs.splice(randomDiv, 1);
-    
-    });
-  });
+    shipCanBePlaced = canBePlaced(
+      board,
+      rows,
+      columns,
+      "horizontal",
+      PLAYER_SHIPS.aircraftCarrier
+    );
+  } while (!shipCanBePlaced);
+  placeShips(board, rows, columns, "horizontal", PLAYER_SHIPS.aircraftCarrier);
 }
 
 
-
 function handleMove(evt) {}
+
+function canBePlaced(board, rows, columns, vertOrHoriz, ship) {
+  console.log(rows + " " + columns);
+  if (vertOrHoriz === "horizontal") {
+    for (let i = columns; i < columns + ship.length; i++) {
+      if (i >= LENGTH || board[rows][i] !== 0) return false;
+    }
+  } else {
+    for (let i = rows; i < rows + ship.length; i++) {
+      if (i >= LENGTH || board[i][columns] !== 0) return false;
+    }
+  }
+  return true;
+}
+
+function placeShips(board, rows, columns, vertOrHoriz, ship) {
+  if (vertOrHoriz === "horizontal") {
+    for (let i = columns; i < columns + ship.length; i++) {
+      
+      playerDivs[i + LENGTH + rows].classList.add("active-ship");
+      board[rows][i] = 1;
+    }
+  } else {
+    for (let i = rows; i < rows + ship.length; i++) {
+      playerDivs[i * LENGTH + columns].classList.add("active-ship");
+      board[i][columns] = 1;
+    }
+  }
+}
+function getRandomNum(x, y) {
+  return Math.floor(Math.random() * (x - y) + y);
+}
