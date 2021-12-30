@@ -1,17 +1,5 @@
 /*----- constants -----*/
 
-const boardDivs = [
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-];
 
 const PLAYER_BOARD = [
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -86,7 +74,7 @@ function render() {
 }
 
 function createBoard(str) {
-  boardDivs.forEach((indArr, outerIdx) => {
+  PLAYER_BOARD.forEach((indArr, outerIdx) => {
     indArr.forEach((arrEl, innerIdx) => {
       const div = document.createElement("DIV");
       div.innerHTML = "";
@@ -130,7 +118,6 @@ function renderShips(board) {
 function handleMove(evt) {}
 
 function canBePlaced(board, rows, columns, vertOrHoriz, ship) {
-  console.log(rows + " " + columns);
   if (vertOrHoriz === "horizontal") {
     for (let i = columns; i < columns + ship.length; i++) {
       if (i >= LENGTH || board[rows][i] !== 0) return false;
@@ -146,7 +133,8 @@ function canBePlaced(board, rows, columns, vertOrHoriz, ship) {
 function placeShips(board, rows, columns, vertOrHoriz, ship) {
   if (vertOrHoriz === "horizontal") {
     for (let i = columns; i < columns + ship.length; i++) {
-      playerDivs[rows * length + i].classList.add("active-ship");
+    
+      playerDivs[rows * LENGTH + i].classList.add("active-ship");
       board[rows][i] = 1;
     }
   } else {
