@@ -86,7 +86,7 @@ const cpuDivs = [];
 const playerBoardSection = document.querySelector(".player-board-section");
 const cpuBoardSection = document.querySelector(".cpu-board-section");
 /*----- event listeners -----*/
-playerBoardSection.addEventListener("click", handleMove);
+document.querySelector(".board-wrapper").addEventListener("click", handleMove);
 /*----- functions -----*/
 render();
 
@@ -141,7 +141,18 @@ function renderShips(board) {
   });
 }
 
-function handleMove(evt) {}
+function handleMove(evt) {
+  let clickedDiv = evt.target;
+  if ([...clickedDiv.classList].includes("cpu-ship")) {
+    let divIdx = cpuDivs.indexOf(clickedDiv);
+    let firstBoardIdx = parseInt(divIdx.toString().charAt(0));
+    let secondBoardIdx = parseInt(divIdx.toString().charAt(1));
+    let vertOrHoriz = [...clickedDiv.classList].includes('vertical') ? 'vertical' : 'horizontal';
+    cpuDivs[divIdx].classList.add("hit-ship");
+    CPU_BOARD[firstBoardIdx][secondBoardIdx] = 2;
+    checkIfSunk(CPU_BOARD, firstBoardIdx, secondBoardIdx,)
+  }
+}
 
 function canBePlaced(board, rows, columns, vertOrHoriz, ship) {
   if (vertOrHoriz === "horizontal") {
@@ -160,18 +171,23 @@ function placeShips(board, rows, columns, vertOrHoriz, ship) {
   if (vertOrHoriz === "horizontal") {
     for (let i = columns; i < columns + ship.length; i++) {
       board === PLAYER_BOARD
-        ? playerDivs[rows * LENGTH + i].classList.add("active-ship")
-        : cpuDivs[rows * LENGTH + i].classList.add("active-ship");
+        ? playerDivs[rows * LENGTH + i].classList.add("player-ship", "horizontal")
+        : cpuDivs[rows * LENGTH + i].classList.add("cpu-ship", "horizontal");
+
       board[rows][i] = 1;
     }
   } else {
     for (let i = rows; i < rows + ship.length; i++) {
       board === PLAYER_BOARD
-        ? playerDivs[i * LENGTH + columns].classList.add("active-ship")
-        : cpuDivs[i * LENGTH + columns].classList.add("active-ship");
+        ? playerDivs[i * LENGTH + columns].classList.add("player-ship", "vertical")
+        : cpuDivs[i * LENGTH + columns].classList.add("cpu-ship", "vertical");
       board[i][columns] = 1;
     }
   }
+}
+
+function checkIfSunk(board, rows, columns, vertOrHoriz) {
+
 }
 function getRandomNum(x, y) {
   return Math.floor(Math.random() * (x - y) + y);
