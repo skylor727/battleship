@@ -105,6 +105,7 @@ const CPU_DIVS = [];
 
 /*----- variable -----*/
 let turn = 1;
+let winner;
 /*----- cached element references -----*/
 const PLAYER_BOARD_SECTION = document.querySelector(".player-board-section");
 const CPU_BOARD_SECTION = document.querySelector(".cpu-board-section");
@@ -222,15 +223,29 @@ function handleMove(evt) {
     let divIdx = CPU_DIVS.indexOf(clickedDiv);
     let rows = parseInt(divIdx.toString().charAt(0));
     let columns = parseInt(divIdx.toString().charAt(1));
-    CPU_DIVS[divIdx].classList.add("hit-ship");
-    CPU_BOARD[rows][columns] = 2;
+    if(isNaN(columns)) {
+      columns = rows;
+      rows = 0;
+    }
     let currentShip = findCorrectShip(
       turn === 1 ? CPU_BOARD : PLAYER_BOARD,
       clickedDiv
     );
-    currentShip.health--;
+    if (![...clickedDiv.classList].includes("hit-ship")) currentShip.health--;
     checkIfSunk(CPU_BOARD, currentShip, clickedDiv);
+    CPU_DIVS[divIdx].classList.add("hit-ship");
+    CPU_BOARD[rows][columns] = 2;
   }
+  
+}
+function findCorrectShip(board, div) {
+  let correctShip;
+  Object.values(board === PLAYER_BOARD ? PLAYER_SHIPS : CPU_SHIPS).forEach(
+    (obj) => {
+      if (obj.key === div.id) correctShip = obj;
+    }
+  );
+  return correctShip;
 }
 
 function checkIfSunk(board, ship, div) {
@@ -245,16 +260,15 @@ function checkIfSunk(board, ship, div) {
       currentPlayer[parseInt(ship.firstIndex) + i].classList.add("sunken-ship");
     }
   }
+  getWinner(board);
 }
 
-function findCorrectShip(board, div) {
-  let correctShip;
-  Object.values(board === PLAYER_BOARD ? PLAYER_SHIPS : CPU_SHIPS).forEach(
-    (obj) => {
-      if (obj.key === div.id) correctShip = obj;
-    }
-  );
-  return correctShip;
+function getWinner(board) {
+  let sunkShipsCounter = 0;
+  Object.values(board == PLAYER_BOARD ? PLAYER_SHIPS : CPU_SHIPS).forEach((obj) => {
+    obj.health === 0 ? sunkShipsCounter ++ : sunkShipsCounter;
+  })
+  console.log(sunkShipsCounter);
 }
 
 function getRandomNum(x, y) {
