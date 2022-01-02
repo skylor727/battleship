@@ -240,6 +240,11 @@ function checkIfSunk(board, ship, div) {
       currentPlayer[parseInt(ship.firstIndex) + i].classList.add("sunken-ship");
     }
   }
+  if (ship.health === 0 && [...div.classList].includes("vertical")) {
+    for (let i = 0; i < ship.length * 10; i += 10) {
+      currentPlayer[parseInt(ship.firstIndex) + i].classList.add("sunken-ship");
+    }
+  }
 }
 
 function findCorrectShip(board, div) {
