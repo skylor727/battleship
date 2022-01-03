@@ -24,7 +24,8 @@ const CPU_BOARD = [
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 ];
-const PLAYER_SHIPS = {
+
+let playerShips = {
   aircraftCarrier: {
     length: 5,
     health: 5,
@@ -61,7 +62,7 @@ const PLAYER_SHIPS = {
     key: "player-ss",
   },
 };
-const CPU_SHIPS = {
+let cpuShips = {
   aircraftCarrier: {
     length: 5,
     health: 5,
@@ -98,6 +99,8 @@ const CPU_SHIPS = {
     key: "cpu-ss",
   },
 };
+const BASE_PLAYER_SHIP_STATES = JSON.parse(JSON.stringify(playerShips));
+const BASE_CPU_SHIP_STATES = JSON.parse(JSON.stringify(cpuShips));
 const LENGTH = CPU_BOARD[0].length;
 const HEIGHT = CPU_BOARD.length;
 const PLAYER_DIVS = [];
@@ -114,11 +117,18 @@ document.querySelector(".board-wrapper").addEventListener("click", handleMove);
 /*----- functions -----*/
 render();
 
+function resetGame() {
+  playerShips = BASE_PLAYER_SHIP_STATES;
+  cpuShips = BASE_CPU_SHIP_STATES;
+  turn = 1;
+}
+
 function render() {
   createBoard("player");
   createBoard("cpu");
   renderShips(PLAYER_BOARD);
   renderShips(CPU_BOARD);
+  activeTurn();
 }
 
 function createBoard(str) {
@@ -142,13 +152,18 @@ function createBoard(str) {
   });
 }
 
+function activeTurn() {
+  const h2 = document.querySelector("h2");
+  h2.innerHTML = `${turn === 1 ? "PLAYER'S TURN" : "CPU'S turn"}`;
+}
+
 function renderShips(board) {
   let shipCanBePlaced;
   let rows;
   let columns;
   let idx = Math.round(Math.random());
   const vertOrHoriz = ["vertical", "horizontal"];
-  Object.values(board === PLAYER_BOARD ? PLAYER_SHIPS : CPU_SHIPS).forEach(
+  Object.values(board === PLAYER_BOARD ? playerShips : cpuShips).forEach(
     (shipObj) => {
       do {
         rows = getRandomNum(0, HEIGHT);
@@ -223,7 +238,7 @@ function handleMove(evt) {
     let divIdx = CPU_DIVS.indexOf(clickedDiv);
     let rows = parseInt(divIdx.toString().charAt(0));
     let columns = parseInt(divIdx.toString().charAt(1));
-    if(isNaN(columns)) {
+    if (isNaN(columns)) {
       columns = rows;
       rows = 0;
     }
@@ -236,11 +251,13 @@ function handleMove(evt) {
     CPU_DIVS[divIdx].classList.add("hit-ship");
     CPU_BOARD[rows][columns] = 2;
   }
+  turn *= -1;
+  activeTurn();
   
 }
 function findCorrectShip(board, div) {
   let correctShip;
-  Object.values(board === PLAYER_BOARD ? PLAYER_SHIPS : CPU_SHIPS).forEach(
+  Object.values(board === PLAYER_BOARD ? playerShips : cpuShips).forEach(
     (obj) => {
       if (obj.key === div.id) correctShip = obj;
     }
@@ -265,10 +282,12 @@ function checkIfSunk(board, ship, div) {
 
 function getWinner(board) {
   let sunkShipsCounter = 0;
-  Object.values(board == PLAYER_BOARD ? PLAYER_SHIPS : CPU_SHIPS).forEach((obj) => {
-    obj.health === 0 ? sunkShipsCounter ++ : sunkShipsCounter;
-  })
-  console.log(sunkShipsCounter);
+  let currentPlayer = board == PLAYER_BOARD ? playerShips : cpuShips;
+  Object.values(currentPlayer).forEach((obj) => {
+    obj.health === 0 ? sunkShipsCounter++ : sunkShipsCounter;
+  });
+  if (sunkShipsCounter === Object.keys(currentPlayer).length)
+    winner = currentPlayer === cpuShips ? 1 : -1;
 }
 
 function getRandomNum(x, y) {
