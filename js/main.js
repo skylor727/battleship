@@ -105,7 +105,7 @@ const LENGTH = CPU_BOARD[0].length;
 const HEIGHT = CPU_BOARD.length;
 const PLAYER_DIVS = [];
 const CPU_DIVS = [];
-
+const LOCATIONS = new Set();
 /*----- variable -----*/
 let turn = 1;
 let winner;
@@ -204,12 +204,9 @@ function placeShips(board, rows, columns, vertOrHoriz, ship) {
       board === PLAYER_BOARD
         ? PLAYER_DIVS[rows * LENGTH + i].classList.add(
             "player-ship",
-            "horizontal",
+            "horizontal"
           )
-        : CPU_DIVS[rows * LENGTH + i].classList.add(
-            "cpu-ship",
-            "horizontal", 
-          );
+        : CPU_DIVS[rows * LENGTH + i].classList.add("cpu-ship", "horizontal");
       board === PLAYER_BOARD
         ? (PLAYER_DIVS[rows * LENGTH + i].id = `${ship.key}`)
         : (CPU_DIVS[rows * LENGTH + i].id = `${ship.key}`);
@@ -235,6 +232,11 @@ function placeShips(board, rows, columns, vertOrHoriz, ship) {
 
 async function handleMove(evt) {
   let clickedDiv = evt.target;
+  if (
+    clickedDiv.classList.contains("hit-ship" || "miss" || "sunken-ship") ||
+    turn === -1
+  )
+    return;
   let divIdx = CPU_DIVS.indexOf(clickedDiv);
   let rows = parseInt(divIdx.toString().charAt(0));
   let columns = parseInt(divIdx.toString().charAt(1));
@@ -253,14 +255,20 @@ async function handleMove(evt) {
   }
   turn = -1;
   await activeTurn();
+
   cpuFire(PLAYER_BOARD);
 }
 
 function cpuFire(board) {
-  let randomDivIdx = getRandomNum(0, 99);
+  let randomDivIdx;
+  do {
+    randomDivIdx = getRandomNum(0, 99);
+  } while (LOCATIONS.has(randomDivIdx));
+  LOCATIONS.add(randomDivIdx);
   let randomDiv = PLAYER_DIVS[randomDivIdx];
   let rows = parseInt(randomDivIdx.toString().charAt(0));
   let columns = parseInt(randomDivIdx.toString().charAt(1));
+
   if (isNaN(columns)) {
     columns = rows;
     rows = 0;
@@ -268,7 +276,8 @@ function cpuFire(board) {
   let currentShip;
   if (PLAYER_DIVS[randomDivIdx].classList.contains("player-ship")) {
     currentShip = findCorrectShip(PLAYER_BOARD, randomDiv);
-    if (!PLAYER_DIVS[randomDivIdx].classList.contains("hit-ship")) currentShip.health--;
+    if (!PLAYER_DIVS[randomDivIdx].classList.contains("hit-ship"))
+      currentShip.health--;
     checkIfSunk(PLAYER_BOARD, currentShip, randomDiv);
     PLAYER_DIVS[randomDivIdx].classList.add("hit-ship");
     PLAYER_BOARD[rows][columns] = 2;
