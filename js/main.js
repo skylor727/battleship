@@ -113,7 +113,9 @@ let winner;
 const PLAYER_BOARD_SECTION = document.querySelector(".player-board-section");
 const CPU_BOARD_SECTION = document.querySelector(".cpu-board-section");
 /*----- event listeners -----*/
-document.querySelector(".board-wrapper").addEventListener("click", handleMove);
+document
+  .querySelector(".cpu-board-section")
+  .addEventListener("click", handleMove);
 /*----- functions -----*/
 render();
 
@@ -152,11 +154,6 @@ function createBoard(str) {
   });
 }
 
-function activeTurn() {
-  const h2 = document.querySelector("h2");
-  h2.innerHTML = `${turn === 1 ? "PLAYER'S TURN" : "CPU'S turn"}`;
-}
-
 function renderShips(board) {
   let shipCanBePlaced;
   let rows;
@@ -182,6 +179,12 @@ function renderShips(board) {
   );
 }
 
+function activeTurn() {
+  const h2 = document.querySelector("h2");
+  h2.innerHTML = `${turn === 1 ? "PLAYER'S TURN" : "CPU'S turn"}`;
+  return sleep(1500);
+}
+
 function canBePlaced(board, rows, columns, vertOrHoriz, ship) {
   if (vertOrHoriz === "horizontal") {
     for (let i = columns; i < columns + ship.length; i++) {
@@ -202,12 +205,10 @@ function placeShips(board, rows, columns, vertOrHoriz, ship) {
         ? PLAYER_DIVS[rows * LENGTH + i].classList.add(
             "player-ship",
             "horizontal",
-            ship.length
           )
         : CPU_DIVS[rows * LENGTH + i].classList.add(
             "cpu-ship",
-            "horizontal",
-            ship.length
+            "horizontal", 
           );
       board === PLAYER_BOARD
         ? (PLAYER_DIVS[rows * LENGTH + i].id = `${ship.key}`)
@@ -232,29 +233,51 @@ function placeShips(board, rows, columns, vertOrHoriz, ship) {
   }
 }
 
-function handleMove(evt) {
+async function handleMove(evt) {
   let clickedDiv = evt.target;
+  let divIdx = CPU_DIVS.indexOf(clickedDiv);
+  let rows = parseInt(divIdx.toString().charAt(0));
+  let columns = parseInt(divIdx.toString().charAt(1));
+  let currentShip;
+  if (isNaN(columns)) {
+    columns = rows;
+    rows = 0;
+  }
+  if (CPU_BOARD[rows][columns] === 0) CPU_DIVS[divIdx].classList.add("miss");
   if ([...clickedDiv.classList].includes("cpu-ship")) {
-    let divIdx = CPU_DIVS.indexOf(clickedDiv);
-    let rows = parseInt(divIdx.toString().charAt(0));
-    let columns = parseInt(divIdx.toString().charAt(1));
-    if (isNaN(columns)) {
-      columns = rows;
-      rows = 0;
-    }
-    let currentShip = findCorrectShip(
-      turn === 1 ? CPU_BOARD : PLAYER_BOARD,
-      clickedDiv
-    );
+    currentShip = findCorrectShip(CPU_BOARD, clickedDiv);
     if (![...clickedDiv.classList].includes("hit-ship")) currentShip.health--;
     checkIfSunk(CPU_BOARD, currentShip, clickedDiv);
     CPU_DIVS[divIdx].classList.add("hit-ship");
     CPU_BOARD[rows][columns] = 2;
   }
-  turn *= -1;
-  activeTurn();
-  
+  turn = -1;
+  await activeTurn();
+  cpuFire(PLAYER_BOARD);
 }
+
+function cpuFire(board) {
+  let randomDivIdx = getRandomNum(0, 99);
+  let randomDiv = PLAYER_DIVS[randomDivIdx];
+  let rows = parseInt(randomDivIdx.toString().charAt(0));
+  let columns = parseInt(randomDivIdx.toString().charAt(1));
+  if (isNaN(columns)) {
+    columns = rows;
+    rows = 0;
+  }
+  let currentShip;
+  if (PLAYER_DIVS[randomDivIdx].classList.contains("player-ship")) {
+    currentShip = findCorrectShip(PLAYER_BOARD, randomDiv);
+    if (!PLAYER_DIVS[randomDivIdx].classList.contains("hit-ship")) currentShip.health--;
+    checkIfSunk(PLAYER_BOARD, currentShip, randomDiv);
+    PLAYER_DIVS[randomDivIdx].classList.add("hit-ship");
+    PLAYER_BOARD[rows][columns] = 2;
+  }
+  if (PLAYER_BOARD[rows][columns] === 0) randomDiv.classList.add("miss");
+  turn = 1;
+  activeTurn();
+}
+
 function findCorrectShip(board, div) {
   let correctShip;
   Object.values(board === PLAYER_BOARD ? playerShips : cpuShips).forEach(
@@ -292,4 +315,8 @@ function getWinner(board) {
 
 function getRandomNum(x, y) {
   return Math.floor(Math.random() * (x - y) + y);
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
