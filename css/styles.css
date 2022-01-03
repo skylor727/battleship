@@ -9,6 +9,9 @@ body {
 h1 {
   text-align: center;
 }
+h2 {
+  text-align: center;
+}
 header {
   display: flex;
   font-size: x-large;
