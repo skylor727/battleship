@@ -109,13 +109,6 @@ const LOCATIONS = new Set();
 /*----- variable -----*/
 let turn = 1;
 let winner;
-let isHit;
-let isSunk;
-let lastHitIdx;
-let missCtr = 0;
-let hitCtr = 0;
-let missAfterHit;
-let lastHitShip;
 /*----- cached element references -----*/
 const PLAYER_BOARD_SECTION = document.querySelector(".player-board-section");
 const CPU_BOARD_SECTION = document.querySelector(".cpu-board-section");
@@ -189,7 +182,7 @@ function renderShips(board) {
 function activeTurn() {
   const h2 = document.querySelector("h2");
   h2.innerHTML = `${turn === 1 ? "PLAYER'S TURN" : "CPU'S turn"}`;
-  return sleep(1000);
+  return sleep(1500);
 }
 
 function canBePlaced(board, rows, columns, vertOrHoriz, ship) {
@@ -269,81 +262,29 @@ async function handleMove(evt) {
 function cpuFire(board) {
   let randomDivIdx;
   do {
-    randomDivIdx = cpuHit(isHit, isSunk, lastHitIdx);
+    randomDivIdx = getRandomNum(0, 99);
   } while (LOCATIONS.has(randomDivIdx));
   LOCATIONS.add(randomDivIdx);
   let randomDiv = PLAYER_DIVS[randomDivIdx];
   let rows = parseInt(randomDivIdx.toString().charAt(0));
   let columns = parseInt(randomDivIdx.toString().charAt(1));
+
   if (isNaN(columns)) {
     columns = rows;
     rows = 0;
   }
-  console.log(rows + " -rows-columns- " + columns);
   let currentShip;
   if (PLAYER_DIVS[randomDivIdx].classList.contains("player-ship")) {
-    isHit = true;
     currentShip = findCorrectShip(PLAYER_BOARD, randomDiv);
     if (!PLAYER_DIVS[randomDivIdx].classList.contains("hit-ship"))
       currentShip.health--;
-    lastHitIdx = randomDivIdx;
-    isSunk = checkIfSunk(PLAYER_BOARD, currentShip, randomDiv) ? true : false;
+    checkIfSunk(PLAYER_BOARD, currentShip, randomDiv);
     PLAYER_DIVS[randomDivIdx].classList.add("hit-ship");
-    missCtr = 0;
-    missAfterHit = false;
     PLAYER_BOARD[rows][columns] = 2;
   }
-  if (PLAYER_BOARD[rows][columns] === 0) {
-    randomDiv.classList.add("miss");
-    console.log("isHit " + isHit + " miss ctr " + missCtr);
-    if (isHit === true && missCtr <= lastHitShip.length) {
-      missAfterHit = true;
-      missCtr++;
-    } else {
-      isHit = false;
-    }
-  }
+  if (PLAYER_BOARD[rows][columns] === 0) randomDiv.classList.add("miss");
   turn = 1;
   activeTurn();
-}
-
-function cpuHit(isHit, isSunk, lastHitIdx, ship) {
-  let randomNum;
-  let isSameLine;
-  if (typeof lastHitIdx !== "undefined") {
-    let div = PLAYER_DIVS[lastHitIdx];
-    lastHitShip = findCorrectShip(PLAYER_BOARD, div);
-
-    let vertOrHoriz = missCtr >= lastHitShip.length ? "vertical" : "horizontal";
-    if (isSunk === false && isHit === true) {
-      hitCtr++;
-      let rows = parseInt(lastHitIdx.toString().charAt(0));
-      let columns = parseInt(lastHitIdx.toString().charAt(1));
-      do {
-        if (vertOrHoriz === "horizontal") {
-          for (let i = columns; i < columns + hitCtr; i++) {
-            if (i >= LENGTH) isSameLine = false;
-          }
-        } else {
-          for (let i = rows; i < rows + hitCtr; i++) {
-            if (i >= LENGTH) isSameLine = false;
-          }
-        }
-        randomNum = getRandomNum(
-          lastHitIdx - lastHitShip.length >= 0
-            ? lastHitIdx - lastHitShip.length
-            : lastHitIdx - lastHitIdx,
-          lastHitIdx + lastHitShip.length <= 99
-            ? lastHitIdx + lastHitShip.length
-            : lastHitIdx + (99 - lastHitIdx)
-        );
-        isSameLine = true;
-      } while (!isSameLine);
-    }
-  } else {
-    randomNum = getRandomNum(0, 99);
-  }
-  return randomNum;
 }
 
 function findCorrectShip(board, div) {
@@ -361,31 +302,14 @@ function checkIfSunk(board, ship, div) {
   if (ship.health === 0 && [...div.classList].includes("horizontal")) {
     for (let i = 0; i < ship.length; i++) {
       currentPlayer[parseInt(ship.firstIndex) + i].classList.add("sunken-ship");
-      getWinner(board);
     }
-    if (board === PLAYER_BOARD) {
-      missCtr = 0;
-      hitCtr = 0;
-      isHit = false;
-      lastHitShip = null;
-    }
-    return true;
   }
   if (ship.health === 0 && [...div.classList].includes("vertical")) {
     for (let i = 0; i < ship.length * 10; i += 10) {
       currentPlayer[parseInt(ship.firstIndex) + i].classList.add("sunken-ship");
-      getWinner(board);
     }
-    if (board === PLAYER_BOARD) {
-      missCtr = 0;
-      hitCtr = 0;
-      isHit = false;
-      lastHitShip = null;
-    }
-
-    return true;
   }
-  return false;
+  getWinner(board);
 }
 
 function getWinner(board) {
