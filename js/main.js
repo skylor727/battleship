@@ -106,9 +106,13 @@ const HEIGHT = CPU_BOARD.length;
 const PLAYER_DIVS = [];
 const CPU_DIVS = [];
 const LOCATIONS = new Set();
+const PREVIOUS_HITS = new Set();
 /*----- variable -----*/
 let turn = 1;
 let winner;
+let lastHitColumn = null;
+let lastHitRow = null;
+let suitableIndex = null;
 /*----- cached element references -----*/
 const PLAYER_BOARD_SECTION = document.querySelector(".player-board-section");
 const CPU_BOARD_SECTION = document.querySelector(".cpu-board-section");
@@ -182,7 +186,7 @@ function renderShips(board) {
 function activeTurn() {
   const h2 = document.querySelector("h2");
   h2.innerHTML = `${turn === 1 ? "PLAYER'S TURN" : "CPU'S turn"}`;
-  return sleep(1500);
+  return sleep(700);
 }
 
 function canBePlaced(board, rows, columns, vertOrHoriz, ship) {
@@ -261,9 +265,14 @@ async function handleMove(evt) {
 
 function cpuFire(board) {
   let randomDivIdx;
-  do {
-    randomDivIdx = getRandomNum(0, 99);
-  } while (LOCATIONS.has(randomDivIdx));
+  if (lastHitRow !== null && lastHitColumn !== null) {
+    suitableIndex = getSuitableIndex(board);
+  }
+  if (suitableIndex === null) {
+    do {
+      randomDivIdx = getRandomNum(0, 99);
+    } while (LOCATIONS.has(randomDivIdx));
+  } else randomDivIdx = suitableIndex;
   LOCATIONS.add(randomDivIdx);
   let randomDiv = PLAYER_DIVS[randomDivIdx];
   let rows = parseInt(randomDivIdx.toString().charAt(0));
@@ -281,12 +290,41 @@ function cpuFire(board) {
     checkIfSunk(PLAYER_BOARD, currentShip, randomDiv);
     PLAYER_DIVS[randomDivIdx].classList.add("hit-ship");
     PLAYER_BOARD[rows][columns] = 2;
+    lastHitColumn = columns;
+    lastHitRow = rows;
+    PREVIOUS_HITS.add(parseInt(rows + "" + columns));
   }
-  if (PLAYER_BOARD[rows][columns] === 0) randomDiv.classList.add("miss");
+  if (PLAYER_BOARD[rows][columns] === 0) {
+    randomDiv.classList.add("miss");
+    PLAYER_BOARD[rows][columns] = 3;
+  }
   turn = 1;
   activeTurn();
 }
 
+function getSuitableIndex(board) {
+  if (
+    board[lastHitRow + 1][lastHitColumn] !== 2 &&
+    board[lastHitRow + 1][lastHitColumn] !== 3 &&
+    board[lastHitRow + 1][lastHitColumn] !== 10
+  ) {
+    return parseInt(lastHitRow + 1 + "" + lastHitColumn);
+  } else if (
+    board[lastHitRow - 1][lastHitColumn] !== 2 &&
+    board[lastHitRow - 1][lastHitColumn] !== 3 &&
+    board[lastHitRow - 1][lastHitColumn] !== -1
+  ) {
+    return parseInt(lastHitRow - 1 + "" + lastHitColumn);
+  } else if (
+    board[lastHitRow][lastHitColumn - 1] !== 2 &&
+    board[lastHitRow][lastHitColumn - 1] !== 3 &&
+    board[lastHitRow][lastHitColumn - 1] !== -1
+  ) {
+    return parseInt(lastHitRow + "" + lastHitColumn - 1);
+  } else lastHitColumn = null;
+  lastHitRow = null;
+  return null;
+}
 function findCorrectShip(board, div) {
   let correctShip;
   Object.values(board === PLAYER_BOARD ? playerShips : cpuShips).forEach(
@@ -302,11 +340,13 @@ function checkIfSunk(board, ship, div) {
   if (ship.health === 0 && [...div.classList].includes("horizontal")) {
     for (let i = 0; i < ship.length; i++) {
       currentPlayer[parseInt(ship.firstIndex) + i].classList.add("sunken-ship");
+      currentPlayer === PLAYER_BOARD ? suitableIndex = null : suitableIndex;
     }
   }
   if (ship.health === 0 && [...div.classList].includes("vertical")) {
     for (let i = 0; i < ship.length * 10; i += 10) {
       currentPlayer[parseInt(ship.firstIndex) + i].classList.add("sunken-ship");
+      currentPlayer === PLAYER_BOARD ? suitableIndex = null : suitableIndex;
     }
   }
   getWinner(board);
