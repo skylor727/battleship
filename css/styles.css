@@ -4,7 +4,9 @@
 
 body {
   font-family: "Alfa Slab One", cursive;
-  background-color: #eef2ff;
+  background-color: #DDE5E2;
+  color:#07150F;
+  letter-spacing: 2px;
 }
 h1 {
   text-align: center;
@@ -16,6 +18,17 @@ header {
   display: flex;
   font-size: x-large;
   justify-content: space-around;
+}
+
+button {
+  display:block;
+  margin: 15px auto;
+  height: 60px;
+  width: 100px;
+  border:none;
+  border-radius: 12px;
+  background-color: #6aac91;
+  font-family: inherit;
 }
 .player-board-section {
   display: grid;
@@ -33,7 +46,7 @@ header {
 }
 
 .board {
-  background-color: #eef2ff;
+  background-color: #6aac91 ;
   border: 2px solid #191919;
 }
 
@@ -42,19 +55,19 @@ header {
   justify-content: space-around;
 }
 .player-ship {
-  background-color: blue;
+  background-color: #3E3E8C;
 }
 .cpu-ship {
-  background-color: grey;
+  
 }
 
 .hit-ship {
-  background-color: orange;
+  background-color: #D745FF;
 }
 
 .sunken-ship {
-  background-color: red;
+  background-color: #09092C;
 }
 .miss {
-  background-color: purple;
+  background-color: #15392a;
 }
