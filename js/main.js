@@ -106,10 +106,10 @@ const HEIGHT = CPU_BOARD.length;
 const PLAYER_DIVS = [];
 const CPU_DIVS = [];
 const LOCATIONS = new Set();
-const PREVIOUS_HITS = new Set();
+const btn = document.createElement("button");
 /*----- variable -----*/
 let turn = 1;
-let winner;
+let winner = null;
 let lastHitColumn = null;
 let lastHitRow = null;
 let suitableIndex = null;
@@ -120,14 +120,9 @@ const CPU_BOARD_SECTION = document.querySelector(".cpu-board-section");
 document
   .querySelector(".cpu-board-section")
   .addEventListener("click", handleMove);
+btn.addEventListener("click", resetGame);
 /*----- functions -----*/
 render();
-
-function resetGame() {
-  playerShips = BASE_PLAYER_SHIP_STATES;
-  cpuShips = BASE_CPU_SHIP_STATES;
-  turn = 1;
-}
 
 function render() {
   createBoard("player");
@@ -135,6 +130,16 @@ function render() {
   renderShips(PLAYER_BOARD);
   renderShips(CPU_BOARD);
   activeTurn();
+}
+
+function resetGame() {
+  playerShips = BASE_PLAYER_SHIP_STATES;
+  cpuShips = BASE_CPU_SHIP_STATES;
+  turn = 1;
+  winner = null;
+  resetBoard(PLAYER_BOARD, PLAYER_DIVS);
+  resetBoard(CPU_BOARD, CPU_DIVS);
+  render();
 }
 
 function createBoard(str) {
@@ -185,7 +190,12 @@ function renderShips(board) {
 
 function activeTurn() {
   const h2 = document.querySelector("h2");
-  h2.innerHTML = `${turn === 1 ? "PLAYER'S TURN" : "CPU'S turn"}`;
+  if (winner !== null) {
+    btn.innerHTML = "Play Again";
+    h2.innerHTML = `${winner === 1 ? "PLAYER WINS!" : "CPU WINS!"}`;
+    document.body.appendChild(btn);
+    return;
+  } else h2.innerHTML = `${turn === 1 ? "PLAYER'S TURN" : "CPU'S turn"}`;
   return sleep(700);
 }
 
@@ -240,13 +250,14 @@ async function handleMove(evt) {
     clickedDiv.classList.contains("miss") ||
     clickedDiv.classList.contains("hit-ship") ||
     clickedDiv.classList.contains("sunken-ship") ||
-    turn === -1
+    turn === -1 ||
+    winner !== null
   )
     return;
 
   let divIdx = CPU_DIVS.indexOf(clickedDiv);
   let rows = parseInt(divIdx.toString().charAt(0));
-  let columns = parseInt(divIdx.toString().charAt(1))
+  let columns = parseInt(divIdx.toString().charAt(1));
   let currentShip;
   if (isNaN(columns)) {
     columns = rows;
@@ -270,9 +281,13 @@ function cpuFire(board) {
   let randomDivIdx;
 
   if (lastHitRow !== null && lastHitColumn !== null) {
-    parseInt((suitableIndex = getSuitableIndex(board)));
+    suitableIndex = parseInt(getSuitableIndex(board));
   }
-  if (suitableIndex === null || LOCATIONS.has(suitableIndex)) {
+  if (
+    suitableIndex === null ||
+    isNaN(suitableIndex) ||
+    LOCATIONS.has(suitableIndex)
+  ) {
     do {
       randomDivIdx = getRandomNum(0, 99);
     } while (LOCATIONS.has(randomDivIdx));
@@ -288,6 +303,7 @@ function cpuFire(board) {
     rows = 0;
   }
   let currentShip;
+
   if (PLAYER_DIVS[randomDivIdx].classList.contains("player-ship")) {
     currentShip = findCorrectShip(PLAYER_BOARD, randomDiv);
     if (!PLAYER_DIVS[randomDivIdx].classList.contains("hit-ship"))
@@ -297,7 +313,6 @@ function cpuFire(board) {
     checkIfSunk(PLAYER_BOARD, currentShip, randomDiv);
     PLAYER_DIVS[randomDivIdx].classList.add("hit-ship");
     PLAYER_BOARD[rows][columns] = 2;
-    PREVIOUS_HITS.add(parseInt(rows + "" + columns));
   }
   if (PLAYER_BOARD[rows][columns] === 0) {
     randomDiv.classList.add("miss");
@@ -375,8 +390,22 @@ function getWinner(board) {
   Object.values(currentPlayer).forEach((obj) => {
     obj.health === 0 ? sunkShipsCounter++ : sunkShipsCounter;
   });
-  if (sunkShipsCounter === Object.keys(currentPlayer).length)
+  if (sunkShipsCounter === Object.keys(currentPlayer).length) {
     winner = currentPlayer === cpuShips ? 1 : -1;
+    activeTurn();
+  }
+}
+
+function resetBoard(board, divs) {
+  board.forEach((arrEl) => {
+    arrEl.forEach((el, innerIdx) => {
+      arrEl[innerIdx] = 0;
+    });
+  });
+  divs.forEach((div) => {
+    div.remove();
+  });
+  divs.length = 0;
 }
 
 function getRandomNum(x, y) {
