@@ -269,13 +269,14 @@ function cpuFire(board) {
     suitableIndex + " suit ind " + lastHitRow + " lhr " + lastHitColumn + " lhc"
   );
   if (lastHitRow !== null && lastHitColumn !== null) {
-    suitableIndex = getSuitableIndex(board);
+    parseInt((suitableIndex = getSuitableIndex(board)));
   }
-  if (suitableIndex === null) {
+  if (suitableIndex === null || LOCATIONS.has(suitableIndex)) {
     do {
       randomDivIdx = getRandomNum(0, 99);
     } while (LOCATIONS.has(randomDivIdx));
-  } else randomDivIdx = parseInt(suitableIndex);
+  } else randomDivIdx = suitableIndex;
+  console.log(randomDivIdx + " randomDivIdx");
   LOCATIONS.add(randomDivIdx);
   let randomDiv = PLAYER_DIVS[randomDivIdx];
   let rows = parseInt(randomDivIdx.toString().charAt(0));
@@ -290,11 +291,11 @@ function cpuFire(board) {
     currentShip = findCorrectShip(PLAYER_BOARD, randomDiv);
     if (!PLAYER_DIVS[randomDivIdx].classList.contains("hit-ship"))
       currentShip.health--;
+    lastHitColumn = columns;
+    lastHitRow = rows;
     checkIfSunk(PLAYER_BOARD, currentShip, randomDiv);
     PLAYER_DIVS[randomDivIdx].classList.add("hit-ship");
     PLAYER_BOARD[rows][columns] = 2;
-    lastHitColumn = columns;
-    lastHitRow = rows;
     PREVIOUS_HITS.add(parseInt(rows + "" + columns));
   }
   if (PLAYER_BOARD[rows][columns] === 0) {
@@ -307,33 +308,33 @@ function cpuFire(board) {
 
 function getSuitableIndex(board) {
   if (
+    board[lastHitRow][lastHitColumn + 1] !== 2 &&
+    board[lastHitRow][lastHitColumn + 1] !== 3 &&
+    (lastHitColumn + 1 !== 10)
+  ) {
+    console.log(parseInt(lastHitRow + "" + lastHitColumn + 1) + " column +1");
+    return `${lastHitRow}${lastHitColumn + 1}`;
+  } else if (
     board[lastHitRow + 1][lastHitColumn] !== 2 &&
     board[lastHitRow + 1][lastHitColumn] !== 3 &&
-    board[lastHitRow + 1][lastHitColumn] !== 10
+    (lastHitRow + 1 !== 10)
   ) {
     console.log(parseInt(lastHitRow + 1 + "" + lastHitColumn) + " row + 1");
-    return lastHitRow + 1 + "" + lastHitColumn;
-  } else if (
-    board[lastHitRow - 1][lastHitColumn] !== 2 &&
-    board[lastHitRow - 1][lastHitColumn] !== 3 &&
-    board[lastHitRow - 1][lastHitColumn] !== -1
-  ) {
-    console.log(parseInt(lastHitRow - 1 + "" + lastHitColumn) + " row - 1");
-    return lastHitRow - 1 + "" + lastHitColumn;
+    return `${lastHitRow + 1}${lastHitColumn}`;
   } else if (
     board[lastHitRow][lastHitColumn - 1] !== 2 &&
     board[lastHitRow][lastHitColumn - 1] !== 3 &&
-    board[lastHitRow][lastHitColumn - 1] !== -1
+    (lastHitColumn - 1 !== -1)
   ) {
     console.log(parseInt(lastHitRow + "" + lastHitColumn - 1) + " column -1");
-    return lastHitRow + "" + lastHitColumn - 1;
+    return `${lastHitRow}${lastHitColumn - 1}`;
   } else if (
-    board[lastHitRow][lastHitColumn + 1] !== 2 &&
-    board[lastHitRow][lastHitColumn + 1] !== 3 &&
-    board[lastHitRow][lastHitColumn + 1] !== 10
+    board[lastHitRow - 1][lastHitColumn] !== 2 &&
+    board[lastHitRow - 1][lastHitColumn] !== 3 &&
+    (lastHitRow - 1 !== -1)
   ) {
-    console.log(parseInt(lastHitRow + "" + lastHitColumn + 1) + " column +1");
-    return lastHitRow + "" + lastHitColumn + 1;
+    console.log(parseInt(lastHitRow - 1 + "" + lastHitColumn) + " row - 1");
+    return `${lastHitRow - 1}${lastHitColumn}`;
   } else return null;
 }
 function findCorrectShip(board, div) {
