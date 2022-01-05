@@ -236,15 +236,17 @@ function placeShips(board, rows, columns, vertOrHoriz, ship) {
 
 async function handleMove(evt) {
   let clickedDiv = evt.target;
-  console.log(clickedDiv);
   if (
-    clickedDiv.classList.contains("miss" ||"hit-ship" || "sunken-ship") ||
+    clickedDiv.classList.contains("miss") ||
+    clickedDiv.classList.contains("hit-ship") ||
+    clickedDiv.classList.contains("sunken-ship") ||
     turn === -1
   )
     return;
+
   let divIdx = CPU_DIVS.indexOf(clickedDiv);
   let rows = parseInt(divIdx.toString().charAt(0));
-  let columns = parseInt(divIdx.toString().charAt(1));
+  let columns = parseInt(divIdx.toString().charAt(1))
   let currentShip;
   if (isNaN(columns)) {
     columns = rows;
