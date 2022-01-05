@@ -133,12 +133,15 @@ function render() {
 }
 
 function resetGame() {
-  playerShips = BASE_PLAYER_SHIP_STATES;
-  cpuShips = BASE_CPU_SHIP_STATES;
+  playerShips = JSON.parse(JSON.stringify(BASE_PLAYER_SHIP_STATES));
+  cpuShips = JSON.parse(JSON.stringify(BASE_CPU_SHIP_STATES));
   turn = 1;
   winner = null;
+  LOCATIONS.clear();
   resetBoard(PLAYER_BOARD, PLAYER_DIVS);
   resetBoard(CPU_BOARD, CPU_DIVS);
+  if (document.body.contains(btn))
+    document.querySelector("body").removeChild(btn);
   render();
 }
 
