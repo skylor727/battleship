@@ -236,8 +236,9 @@ function placeShips(board, rows, columns, vertOrHoriz, ship) {
 
 async function handleMove(evt) {
   let clickedDiv = evt.target;
+  console.log(clickedDiv);
   if (
-    clickedDiv.classList.contains("hit-ship" || "miss" || "sunken-ship") ||
+    clickedDiv.classList.contains("miss" ||"hit-ship" || "sunken-ship") ||
     turn === -1
   )
     return;
@@ -250,9 +251,9 @@ async function handleMove(evt) {
     rows = 0;
   }
   if (CPU_BOARD[rows][columns] === 0) CPU_DIVS[divIdx].classList.add("miss");
-  if ([...clickedDiv.classList].includes("cpu-ship")) {
+  if (clickedDiv.classList.contains("cpu-ship")) {
     currentShip = findCorrectShip(CPU_BOARD, clickedDiv);
-    if (![...clickedDiv.classList].includes("hit-ship")) currentShip.health--;
+    if (!clickedDiv.classList.contains("hit-ship")) currentShip.health--;
     checkIfSunk(CPU_BOARD, currentShip, clickedDiv);
     CPU_DIVS[divIdx].classList.add("hit-ship");
     CPU_BOARD[rows][columns] = 2;
@@ -265,9 +266,7 @@ async function handleMove(evt) {
 
 function cpuFire(board) {
   let randomDivIdx;
-  console.log(
-    suitableIndex + " suit ind " + lastHitRow + " lhr " + lastHitColumn + " lhc"
-  );
+
   if (lastHitRow !== null && lastHitColumn !== null) {
     parseInt((suitableIndex = getSuitableIndex(board)));
   }
@@ -276,7 +275,7 @@ function cpuFire(board) {
       randomDivIdx = getRandomNum(0, 99);
     } while (LOCATIONS.has(randomDivIdx));
   } else randomDivIdx = suitableIndex;
-  console.log(randomDivIdx + " randomDivIdx");
+
   LOCATIONS.add(randomDivIdx);
   let randomDiv = PLAYER_DIVS[randomDivIdx];
   let rows = parseInt(randomDivIdx.toString().charAt(0));
@@ -308,32 +307,28 @@ function cpuFire(board) {
 
 function getSuitableIndex(board) {
   if (
+    lastHitColumn + 1 !== 10 &&
     board[lastHitRow][lastHitColumn + 1] !== 2 &&
-    board[lastHitRow][lastHitColumn + 1] !== 3 &&
-    (lastHitColumn + 1 !== 10)
+    board[lastHitRow][lastHitColumn + 1] !== 3
   ) {
-    console.log(parseInt(lastHitRow + "" + lastHitColumn + 1) + " column +1");
     return `${lastHitRow}${lastHitColumn + 1}`;
   } else if (
+    lastHitRow + 1 !== 10 &&
     board[lastHitRow + 1][lastHitColumn] !== 2 &&
-    board[lastHitRow + 1][lastHitColumn] !== 3 &&
-    (lastHitRow + 1 !== 10)
+    board[lastHitRow + 1][lastHitColumn] !== 3
   ) {
-    console.log(parseInt(lastHitRow + 1 + "" + lastHitColumn) + " row + 1");
     return `${lastHitRow + 1}${lastHitColumn}`;
   } else if (
+    lastHitColumn - 1 !== -1 &&
     board[lastHitRow][lastHitColumn - 1] !== 2 &&
-    board[lastHitRow][lastHitColumn - 1] !== 3 &&
-    (lastHitColumn - 1 !== -1)
+    board[lastHitRow][lastHitColumn - 1] !== 3
   ) {
-    console.log(parseInt(lastHitRow + "" + lastHitColumn - 1) + " column -1");
     return `${lastHitRow}${lastHitColumn - 1}`;
   } else if (
+    lastHitRow - 1 !== -1 &&
     board[lastHitRow - 1][lastHitColumn] !== 2 &&
-    board[lastHitRow - 1][lastHitColumn] !== 3 &&
-    (lastHitRow - 1 !== -1)
+    board[lastHitRow - 1][lastHitColumn] !== 3
   ) {
-    console.log(parseInt(lastHitRow - 1 + "" + lastHitColumn) + " row - 1");
     return `${lastHitRow - 1}${lastHitColumn}`;
   } else return null;
 }
