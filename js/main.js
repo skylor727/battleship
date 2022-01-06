@@ -125,12 +125,14 @@ let shipCounter = 0;
 /*----- cached element references -----*/
 const PLAYER_BOARD_SECTION = document.querySelector(".player-board-section");
 const CPU_BOARD_SECTION = document.querySelector(".cpu-board-section");
-const shipNameEl = document.querySelector("h4");
+const h2 = document.querySelector("h2");
+const verticalCheckboxEl = document.querySelector("input");
+const verticalLabelEl = document.querySelector("label");
 /*----- event listeners -----*/
 CPU_BOARD_SECTION.addEventListener("click", handleMove);
 PLAYER_BOARD_SECTION.addEventListener("click", playerMouseClick);
 playAgainBtn.addEventListener("click", resetGame);
-document.querySelector("input").addEventListener("change", (e) => {
+verticalCheckboxEl.addEventListener("change", (e) => {
   if (e.target.checked) {
     verticalCheckbox = true;
   } else {
@@ -145,7 +147,6 @@ function render() {
   createBoard("cpu");
   // renderShips(PLAYER_BOARD);
   renderShips(CPU_BOARD);
-  updateShipHeader();
   activeTurn();
 }
 
@@ -177,13 +178,14 @@ function createBoard(str) {
       }
       // Checking if the createBoard function was called for the player or the board to append the divs to the correct grid
       str === "player"
-        ? PLAYER_BOARD_SECTION.appendChild(div)
+        ? PLAYER_BOARD_SECTION.prepend(div)
         : CPU_BOARD_SECTION.appendChild(div);
     });
   });
 }
 
 function playerMouseClick(evt) {
+  if (evt.target.tagName === "INPUT" || evt.target.tagName === "LABEL" || shipCounter > 6) return;
   let clickedDiv = PLAYER_DIVS.indexOf(evt.target);
   let rows = parseInt(clickedDiv.toString().charAt(0));
   let columns = parseInt(clickedDiv.toString().charAt(1));
@@ -209,16 +211,9 @@ function playerMouseClick(evt) {
     );
     shipCounter++;
   }
-  updateShipHeader();
+  activeTurn();
 }
 
-function updateShipHeader() {
-  shipCounter <= 6
-    ? (shipNameEl.innerHTML = `Place your ${
-        Object.values(playerShips)[shipCounter].name
-      } ${Object.values(playerShips)[shipCounter].length} Tiles `)
-    : shipNameEl.remove();
-}
 function renderShips(board) {
   let shipCanBePlaced;
   let rows;
@@ -244,13 +239,19 @@ function renderShips(board) {
 }
 
 function activeTurn() {
-  const h2 = document.querySelector("h2");
-  if (winner !== null) {
+  if (shipCounter <= 6) {
+    h2.innerHTML = `Place your ${
+      Object.values(playerShips)[shipCounter].name
+    } ${Object.values(playerShips)[shipCounter].length} Tiles `;
+  } else if (winner !== null) {
     playAgainBtn.innerHTML = "Play Again";
     h2.innerHTML = `${winner === 1 ? "PLAYER WINS!" : "CPU WINS!"}`;
     document.body.appendChild(playAgainBtn);
     return;
-  } else h2.innerHTML = `${turn === 1 ? "PLAYER'S TURN" : "CPU'S turn"}`;
+  } else {
+    verticalLabelEl.style.display = "none";
+    h2.innerHTML = `${turn === 1 ? "PLAYER'S TURN" : "CPU'S turn"}`;
+  }
   return sleep(700);
 }
 
@@ -302,6 +303,7 @@ function placeShips(board, rows, columns, vertOrHoriz, ship) {
 async function handleMove(evt) {
   let clickedDiv = evt.target;
   if (
+    shipCounter <= 6 ||
     clickedDiv.classList.contains("miss") ||
     clickedDiv.classList.contains("hit-ship") ||
     clickedDiv.classList.contains("sunken-ship") ||
@@ -461,6 +463,8 @@ function resetBoard(board, divs) {
     div.remove();
   });
   divs.length = 0;
+  shipCounter = 0;
+  verticalLabelEl.style.display = "flex";
 }
 
 function getRandomNum(x, y) {
