@@ -4,15 +4,26 @@
 
 body {
   font-family: "Alfa Slab One", cursive;
-  background-color: #DDE5E2;
-  color:#07150F;
+  background-color: #dde5e2;
+  color: #07150f;
   letter-spacing: 2px;
+  height: 100%vh;
+  width: 100%vh;
 }
 h1 {
   text-align: center;
 }
 h2 {
   text-align: center;
+}
+h4 {
+  text-align: center;
+}
+
+label {
+  display: flex;
+  margin-left: 28vmin;
+
 }
 header {
   display: flex;
@@ -21,52 +32,52 @@ header {
 }
 
 button {
-  display:block;
+  display: block;
   margin: 15px auto;
   height: 60px;
   width: 100px;
-  border:none;
+  border: none;
   border-radius: 12px;
   background-color: #6aac91;
   font-family: inherit;
 }
 .player-board-section {
   display: grid;
-  grid-template-columns: repeat(10, 50px);
-  grid-template-rows: repeat(10, 50px);
+  grid-template-columns: repeat(10, 7vmin);
+  grid-template-rows: repeat(10, 7vmin);
   justify-content: center;
   text-align: center;
 }
 .cpu-board-section {
   display: grid;
-  grid-template-columns: repeat(10, 50px);
-  grid-template-rows: repeat(10, 50px);
+  grid-template-columns: repeat(10, 7vmin);
+  grid-template-rows: repeat(10, 7vmin);
   justify-content: center;
   text-align: center;
 }
 
 .board {
-  background-color: #6aac91 ;
+  background-color: #6aac91;
   border: 2px solid #191919;
 }
 
 .board-wrapper {
   display: flex;
   justify-content: space-around;
+  flex-wrap: wrap;
 }
 .player-ship {
-  background-color: #3E3E8C;
+  background-color: #3e3e8c;
 }
 .cpu-ship {
-  
 }
 
 .hit-ship {
-  background-color: #D745FF;
+  background-color: #d745ff;
 }
 
 .sunken-ship {
-  background-color: #09092C;
+  background-color: #09092c;
 }
 .miss {
   background-color: #15392a;
