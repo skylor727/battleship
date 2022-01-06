@@ -150,7 +150,7 @@ function render() {
   activeTurn();
 }
 
-//Resetting the game to it's base state after the match has ended
+//Resetting the game to its base state after the match has ended
 function resetGame() {
   playerShips = JSON.parse(JSON.stringify(BASE_PLAYER_SHIP_STATES));
   cpuShips = JSON.parse(JSON.stringify(BASE_CPU_SHIP_STATES));
@@ -342,7 +342,7 @@ async function handleMove(evt) {
   cpuFire(PLAYER_BOARD);
 }
 
-//Generating the CPU's firing locations
+//Generating the CPU firing locations
 function cpuFire(board) {
   let randomDivIdx;
 
