@@ -188,7 +188,7 @@ function createBoard(str) {
 
 //Handling the player clicks for placing ships
 function playerMouseClick(evt) {
-  if (evt.target.tagName === "INPUT" || evt.target.tagName === "LABEL" || shipCounter > 6) return;
+  if (evt.target.tagName === "INPUT" || evt.target.tagName === "LABEL" || shipCounter > 6 || evt.target === PLAYER_BOARD_SECTION) return;
   let clickedDiv = PLAYER_DIVS.indexOf(evt.target);
   let rows = parseInt(clickedDiv.toString().charAt(0));
   let columns = parseInt(clickedDiv.toString().charAt(1));
