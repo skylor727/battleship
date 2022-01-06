@@ -125,7 +125,7 @@ let shipCounter = 0;
 /*----- cached element references -----*/
 const PLAYER_BOARD_SECTION = document.querySelector(".player-board-section");
 const CPU_BOARD_SECTION = document.querySelector(".cpu-board-section");
-const h2 = document.querySelector("h2");
+const activePlayerEl = document.querySelector("h2");
 const verticalCheckboxEl = document.querySelector("input");
 const verticalLabelEl = document.querySelector("label");
 /*----- event listeners -----*/
@@ -142,14 +142,15 @@ verticalCheckboxEl.addEventListener("change", (e) => {
 /*----- functions -----*/
 render();
 
+//Initial rendering of the divs and header.
 function render() {
   createBoard("player");
   createBoard("cpu");
-  // renderShips(PLAYER_BOARD);
   renderShips(CPU_BOARD);
   activeTurn();
 }
 
+//Resetting the game to it's base state after the match has ended
 function resetGame() {
   playerShips = JSON.parse(JSON.stringify(BASE_PLAYER_SHIP_STATES));
   cpuShips = JSON.parse(JSON.stringify(BASE_CPU_SHIP_STATES));
@@ -163,6 +164,7 @@ function resetGame() {
   render();
 }
 
+//Creating the game board
 function createBoard(str) {
   PLAYER_BOARD.forEach((indArr, outerIdx) => {
     indArr.forEach((arrEl, innerIdx) => {
@@ -184,6 +186,7 @@ function createBoard(str) {
   });
 }
 
+//Handling the player clicks for placing ships
 function playerMouseClick(evt) {
   if (evt.target.tagName === "INPUT" || evt.target.tagName === "LABEL" || shipCounter > 6) return;
   let clickedDiv = PLAYER_DIVS.indexOf(evt.target);
@@ -214,6 +217,7 @@ function playerMouseClick(evt) {
   activeTurn();
 }
 
+//Rendering the ships on the game board
 function renderShips(board) {
   let shipCanBePlaced;
   let rows;
@@ -238,23 +242,25 @@ function renderShips(board) {
   });
 }
 
+//Modifying the header based on the current games state
 function activeTurn() {
   if (shipCounter <= 6) {
-    h2.innerHTML = `Place your ${
+    activePlayerEl.innerHTML = `Place your ${
       Object.values(playerShips)[shipCounter].name
     } ${Object.values(playerShips)[shipCounter].length} Tiles `;
   } else if (winner !== null) {
     playAgainBtn.innerHTML = "Play Again";
-    h2.innerHTML = `${winner === 1 ? "PLAYER WINS!" : "CPU WINS!"}`;
+    activePlayerEl.innerHTML = `${winner === 1 ? "PLAYER WINS!" : "CPU WINS!"}`;
     document.body.appendChild(playAgainBtn);
     return;
   } else {
     verticalLabelEl.style.display = "none";
-    h2.innerHTML = `${turn === 1 ? "PLAYER'S TURN" : "CPU'S turn"}`;
+    activePlayerEl.innerHTML = `${turn === 1 ? "PLAYER'S TURN" : "CPU'S turn"}`;
   }
   return sleep(700);
 }
 
+//Checking if the ship can be placed on the selected div
 function canBePlaced(board, rows, columns, vertOrHoriz, ship) {
   if (vertOrHoriz === "horizontal") {
     for (let i = columns; i < columns + ship.length; i++) {
@@ -268,6 +274,7 @@ function canBePlaced(board, rows, columns, vertOrHoriz, ship) {
   return true;
 }
 
+//Actually placing the ships after confirming that they can be placed
 function placeShips(board, rows, columns, vertOrHoriz, ship) {
   if (vertOrHoriz === "horizontal") {
     for (let i = columns; i < columns + ship.length; i++) {
@@ -300,6 +307,7 @@ function placeShips(board, rows, columns, vertOrHoriz, ship) {
   }
 }
 
+//Handling the player clicking the CPU board to fire
 async function handleMove(evt) {
   let clickedDiv = evt.target;
   if (
@@ -334,6 +342,7 @@ async function handleMove(evt) {
   cpuFire(PLAYER_BOARD);
 }
 
+//Generating the CPU's firing locations
 function cpuFire(board) {
   let randomDivIdx;
 
@@ -379,6 +388,7 @@ function cpuFire(board) {
   activeTurn();
 }
 
+//Finding if there is an index around the last hit div that can be fired at again
 function getSuitableIndex(board) {
   if (
     lastHitColumn + 1 !== 10 &&
@@ -406,6 +416,8 @@ function getSuitableIndex(board) {
     return `${lastHitRow - 1}${lastHitColumn}`;
   } else return null;
 }
+
+//Get the correct ship object from the clicked div
 function findCorrectShip(board, div) {
   let correctShip;
   Object.values(board === PLAYER_BOARD ? playerShips : cpuShips).forEach(
@@ -416,6 +428,7 @@ function findCorrectShip(board, div) {
   return correctShip;
 }
 
+//Checking if the ship that was hit has been sunk
 function checkIfSunk(board, ship, div) {
   let currentPlayer = board === PLAYER_BOARD ? PLAYER_DIVS : CPU_DIVS;
   if (ship.health === 0 && [...div.classList].includes("horizontal")) {
@@ -440,7 +453,7 @@ function checkIfSunk(board, ship, div) {
   }
   getWinner(board);
 }
-
+//Checking if a winner has been found
 function getWinner(board) {
   let sunkShipsCounter = 0;
   let currentPlayer = board == PLAYER_BOARD ? playerShips : cpuShips;
@@ -453,6 +466,7 @@ function getWinner(board) {
   }
 }
 
+//Removing the existing divs
 function resetBoard(board, divs) {
   board.forEach((arrEl) => {
     arrEl.forEach((el, innerIdx) => {
@@ -466,6 +480,7 @@ function resetBoard(board, divs) {
   shipCounter = 0;
   verticalLabelEl.style.display = "flex";
 }
+
 
 function getRandomNum(x, y) {
   return Math.floor(Math.random() * (x - y) + y);
