@@ -27,36 +27,43 @@ const CPU_BOARD = [
 
 let playerShips = {
   aircraftCarrier: {
+    name: "Aircraft Carrier",
     length: 5,
     health: 5,
     key: "player-ac",
   },
   battleship: {
+    name: "Battleship",
     length: 4,
     health: 4,
     key: "player-bs",
   },
   cruiser: {
+    name: "cruiser",
     length: 3,
     health: 3,
     key: "player-cr",
   },
   firstDestroyer: {
+    name: "First Destroyer",
     length: 3,
     health: 3,
     key: "player-fd",
   },
   secondDestroyer: {
+    name: "Second Destroyer",
     length: 3,
     health: 3,
     key: "player-sd",
   },
   firstSubmarine: {
+    name: "First Submarine",
     length: 2,
     health: 2,
     key: "player-fs",
   },
   secondSubmarine: {
+    name: "Second Submarine",
     length: 2,
     health: 2,
     key: "player-ss",
@@ -106,29 +113,39 @@ const HEIGHT = CPU_BOARD.length;
 const PLAYER_DIVS = [];
 const CPU_DIVS = [];
 const LOCATIONS = new Set();
-const btn = document.createElement("button");
-/*----- variable -----*/
+const playAgainBtn = document.createElement("button");
+/*----- variables -----*/
 let turn = 1;
 let winner = null;
 let lastHitColumn = null;
 let lastHitRow = null;
 let suitableIndex = null;
+let verticalCheckbox = false;
+let shipCounter = 0;
 /*----- cached element references -----*/
 const PLAYER_BOARD_SECTION = document.querySelector(".player-board-section");
 const CPU_BOARD_SECTION = document.querySelector(".cpu-board-section");
+const shipNameEl = document.querySelector("h4");
 /*----- event listeners -----*/
-document
-  .querySelector(".cpu-board-section")
-  .addEventListener("click", handleMove);
-btn.addEventListener("click", resetGame);
+CPU_BOARD_SECTION.addEventListener("click", handleMove);
+PLAYER_BOARD_SECTION.addEventListener("click", playerMouseClick);
+playAgainBtn.addEventListener("click", resetGame);
+document.querySelector("input").addEventListener("change", (e) => {
+  if (e.target.checked) {
+    verticalCheckbox = true;
+  } else {
+    verticalCheckbox = false;
+  }
+});
 /*----- functions -----*/
 render();
 
 function render() {
   createBoard("player");
   createBoard("cpu");
-  renderShips(PLAYER_BOARD);
+  // renderShips(PLAYER_BOARD);
   renderShips(CPU_BOARD);
+  updateShipHeader();
   activeTurn();
 }
 
@@ -140,8 +157,8 @@ function resetGame() {
   LOCATIONS.clear();
   resetBoard(PLAYER_BOARD, PLAYER_DIVS);
   resetBoard(CPU_BOARD, CPU_DIVS);
-  if (document.body.contains(btn))
-    document.querySelector("body").removeChild(btn);
+  if (document.body.contains(playAgainBtn))
+    document.querySelector("body").removeChild(playAgainBtn);
   render();
 }
 
@@ -166,37 +183,72 @@ function createBoard(str) {
   });
 }
 
+function playerMouseClick(evt) {
+  let clickedDiv = PLAYER_DIVS.indexOf(evt.target);
+  let rows = parseInt(clickedDiv.toString().charAt(0));
+  let columns = parseInt(clickedDiv.toString().charAt(1));
+  if (isNaN(columns)) {
+    columns = rows;
+    rows = 0;
+  }
+  let shipCanBePlaced;
+  shipCanBePlaced = canBePlaced(
+    PLAYER_BOARD,
+    rows,
+    columns,
+    verticalCheckbox === true ? "vertical" : "horizontal",
+    Object.values(playerShips)[shipCounter]
+  );
+  if (shipCanBePlaced === true) {
+    placeShips(
+      PLAYER_BOARD,
+      rows,
+      columns,
+      verticalCheckbox === true ? "vertical" : "horizontal",
+      Object.values(playerShips)[shipCounter]
+    );
+    shipCounter++;
+  }
+  updateShipHeader();
+}
+
+function updateShipHeader() {
+  shipCounter <= 6
+    ? (shipNameEl.innerHTML = `Place your ${
+        Object.values(playerShips)[shipCounter].name
+      } ${Object.values(playerShips)[shipCounter].length} Tiles `)
+    : shipNameEl.remove();
+}
 function renderShips(board) {
   let shipCanBePlaced;
   let rows;
   let columns;
   let idx = Math.round(Math.random());
   const vertOrHoriz = ["vertical", "horizontal"];
-  Object.values(board === PLAYER_BOARD ? playerShips : cpuShips).forEach(
-    (shipObj) => {
-      do {
-        rows = getRandomNum(0, HEIGHT);
-        columns = getRandomNum(0, LENGTH);
-        shipCanBePlaced = canBePlaced(
-          board,
-          rows,
-          columns,
-          vertOrHoriz[idx],
-          shipObj
-        );
-      } while (!shipCanBePlaced);
-      placeShips(board, rows, columns, vertOrHoriz[idx], shipObj);
-      idx = Math.round(Math.random());
-    }
-  );
+
+  Object.values(cpuShips).forEach((shipObj) => {
+    do {
+      rows = getRandomNum(0, HEIGHT);
+      columns = getRandomNum(0, LENGTH);
+      shipCanBePlaced = canBePlaced(
+        board,
+        rows,
+        columns,
+        vertOrHoriz[idx],
+        shipObj
+      );
+    } while (!shipCanBePlaced);
+    placeShips(board, rows, columns, vertOrHoriz[idx], shipObj);
+    idx = Math.round(Math.random());
+  });
 }
 
 function activeTurn() {
   const h2 = document.querySelector("h2");
   if (winner !== null) {
-    btn.innerHTML = "Play Again";
+    playAgainBtn.innerHTML = "Play Again";
     h2.innerHTML = `${winner === 1 ? "PLAYER WINS!" : "CPU WINS!"}`;
-    document.body.appendChild(btn);
+    document.body.appendChild(playAgainBtn);
     return;
   } else h2.innerHTML = `${turn === 1 ? "PLAYER'S TURN" : "CPU'S turn"}`;
   return sleep(700);
