@@ -3,7 +3,7 @@
 ![Gameboard](https://i.imgur.com/6zSCDlV.png)
 ![CPU winning](https://i.imgur.com/QY6miCk.png)
 ![Player winning](https://i.imgur.com/6ofFqPp.png)
-![First turn](https://i.imgur.com/MGlKGJL.png)
+![First turn](https://i.imgur.com/WVPFjD4.png)
 ## Technologies Used
    - HTML 
    - CSS
