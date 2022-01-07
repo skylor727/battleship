@@ -43,6 +43,7 @@ button {
 }
 .player-board-section {
   display: grid;
+  margin-bottom: 2vmin;
   grid-template-columns: repeat(10, 7vmin);
   grid-template-rows: repeat(10, 7vmin);
   justify-content: center;
