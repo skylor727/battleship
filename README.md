@@ -1,4 +1,5 @@
 # **Welcome to the Game of Battleship**
+The classic game of battleship. Place your ships and play with the computer. First person to sink all of their opponents ships will win.
 ## Screenshots
 ![Gameboard](https://i.imgur.com/6zSCDlV.png)
 ![CPU winning](https://i.imgur.com/QY6miCk.png)
