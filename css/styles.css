@@ -23,7 +23,6 @@ h4 {
 label {
   display: flex;
   margin-left: 28vmin;
-
 }
 header {
   display: flex;
@@ -66,6 +65,7 @@ button {
   display: flex;
   justify-content: space-around;
   flex-wrap: wrap;
+  width: 100%;
 }
 .player-ship {
   background-color: #3e3e8c;
@@ -82,4 +82,31 @@ button {
 }
 .miss {
   background-color: #15392a;
+}
+.color-legend {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.miss-legend {
+  background-color: #15392a;
+  width: 4vmin;
+  height: 4vmin;
+}
+
+.hit-legend {
+  background-color: #d745ff;
+  width: 4vmin;
+  height: 4vmin;
+}
+
+.sunk-legend {
+  background-color: #09092c;
+  width: 4vmin;
+  height: 4vmin;
+}
+.active-legend {
+  background-color: #3e3e8c;
+  width: 4vmin;
+  height: 4vmin;
 }
