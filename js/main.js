@@ -31,6 +31,7 @@ let playerShips = {
     length: 5,
     health: 5,
     firstIndex: undefined,
+    orientation: undefined,
     key: "player-ac",
   },
   battleship: {
@@ -38,6 +39,7 @@ let playerShips = {
     length: 4,
     health: 4,
     firstIndex: undefined,
+    orientation: undefined,
     key: "player-bs",
   },
   cruiser: {
@@ -45,6 +47,7 @@ let playerShips = {
     length: 3,
     health: 3,
     firstIndex: undefined,
+    orientation: undefined,
     key: "player-cr",
   },
   firstDestroyer: {
@@ -52,6 +55,7 @@ let playerShips = {
     length: 3,
     health: 3,
     firstIndex: undefined,
+    orientation: undefined,
     key: "player-fd",
   },
   secondDestroyer: {
@@ -59,6 +63,7 @@ let playerShips = {
     length: 3,
     health: 3,
     firstIndex: undefined,
+    orientation: undefined,
     key: "player-sd",
   },
   firstSubmarine: {
@@ -66,6 +71,7 @@ let playerShips = {
     length: 2,
     health: 2,
     firstIndex: undefined,
+    orientation: undefined,
     key: "player-fs",
   },
   secondSubmarine: {
@@ -73,6 +79,7 @@ let playerShips = {
     length: 2,
     health: 2,
     firstIndex: undefined,
+    orientation: undefined,
     key: "player-ss",
   },
 };
@@ -81,42 +88,49 @@ let cpuShips = {
     length: 5,
     health: 5,
     firstIndex: undefined,
+    orientation: undefined,
     key: "cpu-ac",
   },
   battleship: {
     length: 4,
     health: 4,
     firstIndex: undefined,
+    orientation: undefined,
     key: "cpu-bs",
   },
   cruiser: {
     length: 3,
     health: 3,
     firstIndex: undefined,
+    orientation: undefined,
     key: "cpu-cr",
   },
   firstDestroyer: {
     length: 3,
     health: 3,
     firstIndex: undefined,
+    orientation: undefined,
     key: "cpu-fd",
   },
   secondDestroyer: {
     length: 3,
     health: 3,
     firstIndex: undefined,
+    orientation: undefined,
     key: "cpu-sd",
   },
   firstSubmarine: {
     length: 2,
     health: 2,
     firstIndex: undefined,
+    orientation: undefined,
     key: "cpu-fs",
   },
   secondSubmarine: {
     length: 2,
     health: 2,
     firstIndex: undefined,
+    orientation: undefined,
     key: "cpu-ss",
   },
 };
@@ -217,12 +231,9 @@ function playerMouseClick(evt) {
   )
     return;
   let clickedDiv = PLAYER_DIVS.indexOf(evt.target);
-  let rows = parseInt(clickedDiv.toString().charAt(0));
-  let columns = parseInt(clickedDiv.toString().charAt(1));
-  if (isNaN(columns)) {
-    columns = rows;
-    rows = 0;
-  }
+  let rowsAndColumns = getRowsAndColumns(clickedDiv);
+  let rows = rowsAndColumns.rows;
+  let columns = rowsAndColumns.columns;
   let shipCanBePlaced;
   shipCanBePlaced = canBePlaced(
     PLAYER_BOARD,
@@ -309,30 +320,26 @@ function placeShips(board, rows, columns, vertOrHoriz, ship) {
   if (vertOrHoriz === "horizontal") {
     for (let i = columns; i < columns + ship.length; i++) {
       board === PLAYER_BOARD
-        ? PLAYER_DIVS[rows * LENGTH + i].classList.add(
-            "player-ship",
-            "horizontal"
-          )
-        : CPU_DIVS[rows * LENGTH + i].classList.add("cpu-ship", "horizontal");
+        ? PLAYER_DIVS[rows * LENGTH + i].classList.add("player-ship")
+        : CPU_DIVS[rows * LENGTH + i].classList.add("cpu-ship");
       board === PLAYER_BOARD
         ? (PLAYER_DIVS[rows * LENGTH + i].id = `${ship.key}`)
         : (CPU_DIVS[rows * LENGTH + i].id = `${ship.key}`);
       ship.firstIndex = `${rows}${columns}`;
-      board[rows][i] = ACTIVE_SHIP; //TODO FIX
+      board[rows][i] = ACTIVE_SHIP;
+      ship.orientation = "horizontal";
     }
   } else {
     for (let i = rows; i < rows + ship.length; i++) {
       board === PLAYER_BOARD
-        ? PLAYER_DIVS[i * LENGTH + columns].classList.add(
-            "player-ship",
-            "vertical"
-          )
-        : CPU_DIVS[i * LENGTH + columns].classList.add("cpu-ship", "vertical");
+        ? PLAYER_DIVS[i * LENGTH + columns].classList.add("player-ship")
+        : CPU_DIVS[i * LENGTH + columns].classList.add("cpu-ship");
       board === PLAYER_BOARD
         ? (PLAYER_DIVS[i * LENGTH + columns].id = `${ship.key}`)
         : (CPU_DIVS[i * LENGTH + columns].id = `${ship.key}`);
       ship.firstIndex = `${rows}${columns}`;
       board[i][columns] = ACTIVE_SHIP;
+      ship.orientation = "vertical";
     }
   }
 }
@@ -351,13 +358,10 @@ async function handleMove(evt) {
     return;
 
   let divIdx = CPU_DIVS.indexOf(clickedDiv);
-  let rows = parseInt(divIdx.toString().charAt(0));
-  let columns = parseInt(divIdx.toString().charAt(1));
+  let rowsAndColumns = getRowsAndColumns(divIdx);
+  let rows = rowsAndColumns.rows;
+  let columns = rowsAndColumns.columns;
   let currentShip;
-  if (isNaN(columns)) {
-    columns = rows;
-    rows = 0;
-  }
   if (CPU_BOARD[rows][columns] === NO_SHIP) {
     CPU_DIVS[divIdx].classList.add("miss");
     CPU_BOARD[rows][columns] === MISS;
@@ -394,13 +398,9 @@ function cpuFire(board) {
 
   LOCATIONS.add(randomDivIdx);
   let randomDiv = PLAYER_DIVS[randomDivIdx];
-  let rows = parseInt(randomDivIdx.toString().charAt(0));
-  let columns = parseInt(randomDivIdx.toString().charAt(1));
-
-  if (isNaN(columns)) {
-    columns = rows;
-    rows = 0;
-  }
+  let rowsAndColumns = getRowsAndColumns(randomDivIdx);
+  let rows = rowsAndColumns.rows;
+  let columns = rowsAndColumns.columns;
   let currentShip;
 
   if (PLAYER_DIVS[randomDivIdx].classList.contains("player-ship")) {
@@ -464,7 +464,7 @@ function findCorrectShip(board, div) {
 //Checking if the ship that was hit has been sunk
 function checkIfSunk(board, ship, div) {
   let currentPlayer = board === PLAYER_BOARD ? PLAYER_DIVS : CPU_DIVS;
-  if (ship.health === 0 && div.classList.contains("horizontal")) {
+  if (ship.health === 0 && ship.orientation === "horizontal") {
     for (let i = 0; i < ship.length; i++) {
       currentPlayer[parseInt(ship.firstIndex) + i].classList.add("sunken-ship");
     }
@@ -472,7 +472,7 @@ function checkIfSunk(board, ship, div) {
       suitableIndex = lastHitRow = lastHitColumn = null;
     }
   }
-  if (ship.health === 0 && div.classList.contains("vertical")) {
+  if (ship.health === 0 && ship.orientation === "vertical") {
     for (let i = 0; i < ship.length * HEIGHT; i += HEIGHT) {
       currentPlayer[parseInt(ship.firstIndex) + i].classList.add("sunken-ship");
     }
@@ -509,6 +509,20 @@ function resetBoard(board, divs) {
   divs.length = 0;
   shipCounter = 0;
   verticalLabelEl.style.display = "flex";
+}
+
+function getRowsAndColumns(div) {
+  let rows = parseInt(div.toString().charAt(0));
+  let columns = parseInt(div.toString().charAt(1));
+  if (isNaN(columns)) {
+    columns = rows;
+    rows = 0;
+  }
+  let colsAndRows = {
+    rows,
+    columns,
+  };
+  return colsAndRows;
 }
 
 function getRandomNum(x, y) {
