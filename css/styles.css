@@ -4,29 +4,109 @@
 
 body {
   font-family: "Alfa Slab One", cursive;
-  background-color: #EEF2FF;
+  background-color: #dde5e2;
+  color: #07150f;
+  letter-spacing: 2px;
+  height: 100%vh;
+  width: 100%vh;
 }
 h1 {
   text-align: center;
 }
+h2 {
+  text-align: center;
+}
+h4 {
+  text-align: center;
+}
+
+label {
+  display: flex;
+  margin-left: 28vmin;
+}
+header {
+  display: flex;
+  font-size: x-large;
+  justify-content: space-around;
+}
+
+button {
+  display: block;
+  margin: 15px auto;
+  height: 60px;
+  width: 100px;
+  border: none;
+  border-radius: 12px;
+  background-color: #6aac91;
+  font-family: inherit;
+}
 .player-board-section {
   display: grid;
-  grid-template-columns: repeat(11, 40px);
-  grid-template-rows: repeat(11, 40px);
+  margin-bottom: 2vmin;
+  grid-template-columns: repeat(10, 7vmin);
+  grid-template-rows: repeat(10, 7vmin);
   justify-content: center;
+  text-align: center;
 }
 .cpu-board-section {
-    display: grid;
-    grid-template-columns: repeat(11, 40px);
-    grid-template-rows: repeat(11, 40px);
-    justify-content: center;
-  }
+  display: grid;
+  grid-template-columns: repeat(10, 7vmin);
+  grid-template-rows: repeat(10, 7vmin);
+  justify-content: center;
+  text-align: center;
+}
+
 .board {
-  background-color: #EEF2FF;
+  background-color: #6aac91;
   border: 2px solid #191919;
 }
 
 .board-wrapper {
-    display:flex;
-    justify-content: space-between;
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  width: 100%;
+}
+.player-ship {
+  background-color: #3e3e8c;
+}
+.cpu-ship {
+}
+
+.hit-ship {
+  background-color: #d745ff;
+}
+
+.sunken-ship {
+  background-color: #09092c;
+}
+.miss {
+  background-color: #15392a;
+}
+.color-legend {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.miss-legend {
+  background-color: #15392a;
+  width: 4vmin;
+  height: 4vmin;
+}
+
+.hit-legend {
+  background-color: #d745ff;
+  width: 4vmin;
+  height: 4vmin;
+}
+
+.sunk-legend {
+  background-color: #09092c;
+  width: 4vmin;
+  height: 4vmin;
+}
+.active-legend {
+  background-color: #3e3e8c;
+  width: 4vmin;
+  height: 4vmin;
 }
