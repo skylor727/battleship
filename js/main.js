@@ -30,42 +30,49 @@ let playerShips = {
     name: "Aircraft Carrier",
     length: 5,
     health: 5,
+    firstIndex: undefined,
     key: "player-ac",
   },
   battleship: {
     name: "Battleship",
     length: 4,
     health: 4,
+    firstIndex: undefined,
     key: "player-bs",
   },
   cruiser: {
     name: "cruiser",
     length: 3,
     health: 3,
+    firstIndex: undefined,
     key: "player-cr",
   },
   firstDestroyer: {
     name: "First Destroyer",
     length: 3,
     health: 3,
+    firstIndex: undefined,
     key: "player-fd",
   },
   secondDestroyer: {
     name: "Second Destroyer",
     length: 3,
     health: 3,
+    firstIndex: undefined,
     key: "player-sd",
   },
   firstSubmarine: {
     name: "First Submarine",
     length: 2,
     health: 2,
+    firstIndex: undefined,
     key: "player-fs",
   },
   secondSubmarine: {
     name: "Second Submarine",
     length: 2,
     health: 2,
+    firstIndex: undefined,
     key: "player-ss",
   },
 };
@@ -73,49 +80,63 @@ let cpuShips = {
   aircraftCarrier: {
     length: 5,
     health: 5,
+    firstIndex: undefined,
     key: "cpu-ac",
   },
   battleship: {
     length: 4,
     health: 4,
+    firstIndex: undefined,
     key: "cpu-bs",
   },
   cruiser: {
     length: 3,
     health: 3,
+    firstIndex: undefined,
     key: "cpu-cr",
   },
   firstDestroyer: {
     length: 3,
     health: 3,
+    firstIndex: undefined,
     key: "cpu-fd",
   },
   secondDestroyer: {
     length: 3,
     health: 3,
+    firstIndex: undefined,
     key: "cpu-sd",
   },
   firstSubmarine: {
     length: 2,
     health: 2,
+    firstIndex: undefined,
     key: "cpu-fs",
   },
   secondSubmarine: {
     length: 2,
     health: 2,
+    firstIndex: undefined,
     key: "cpu-ss",
   },
 };
 const BASE_PLAYER_SHIP_STATES = JSON.parse(JSON.stringify(playerShips));
 const BASE_CPU_SHIP_STATES = JSON.parse(JSON.stringify(cpuShips));
+const NUM_OF_SHIPS = Object.keys(playerShips).length - 1;
 const LENGTH = CPU_BOARD[0].length;
 const HEIGHT = CPU_BOARD.length;
 const PLAYER_DIVS = [];
 const CPU_DIVS = [];
 const LOCATIONS = new Set();
 const playAgainBtn = document.createElement("button");
+const PLAYER = 1;
+const CPU = -1;
+const ACTIVE_SHIP = 1;
+const HIT_SHIP = 2;
+const MISS = 3;
+const NO_SHIP = 0;
 /*----- variables -----*/
-let turn = 1;
+let turn = PLAYER;
 let winner = null;
 let lastHitColumn = null;
 let lastHitRow = null;
@@ -154,7 +175,7 @@ function render() {
 function resetGame() {
   playerShips = JSON.parse(JSON.stringify(BASE_PLAYER_SHIP_STATES));
   cpuShips = JSON.parse(JSON.stringify(BASE_CPU_SHIP_STATES));
-  turn = 1;
+  turn = PLAYER;
   winner = null;
   LOCATIONS.clear();
   resetBoard(PLAYER_BOARD, PLAYER_DIVS);
@@ -188,7 +209,13 @@ function createBoard(str) {
 
 //Handling the player clicks for placing ships
 function playerMouseClick(evt) {
-  if (evt.target.tagName === "INPUT" || evt.target.tagName === "LABEL" || shipCounter > 6 || evt.target === PLAYER_BOARD_SECTION) return;
+  if (
+    evt.target.tagName === "INPUT" ||
+    evt.target.tagName === "LABEL" ||
+    shipCounter > NUM_OF_SHIPS ||
+    evt.target === PLAYER_BOARD_SECTION
+  )
+    return;
   let clickedDiv = PLAYER_DIVS.indexOf(evt.target);
   let rows = parseInt(clickedDiv.toString().charAt(0));
   let columns = parseInt(clickedDiv.toString().charAt(1));
@@ -244,18 +271,21 @@ function renderShips(board) {
 
 //Modifying the header based on the current games state
 function activeTurn() {
-  if (shipCounter <= 6) {
-    activePlayerEl.innerHTML = `Place your ${
-      Object.values(playerShips)[shipCounter].name
-    } ${Object.values(playerShips)[shipCounter].length} Tiles `;
+  if (shipCounter <= NUM_OF_SHIPS) {
+    const ship = Object.values(playerShips)[shipCounter];
+    activePlayerEl.innerHTML = `Place your ${ship.name} ${ship.length} Tiles `;
   } else if (winner !== null) {
     playAgainBtn.innerHTML = "Play Again";
-    activePlayerEl.innerHTML = `${winner === 1 ? "PLAYER WINS!" : "CPU WINS!"}`;
+    activePlayerEl.innerHTML = `${
+      winner === PLAYER ? "PLAYER WINS!" : "CPU WINS!"
+    }`;
     document.body.appendChild(playAgainBtn);
     return;
   } else {
     verticalLabelEl.style.display = "none";
-    activePlayerEl.innerHTML = `${turn === 1 ? "PLAYER'S TURN" : "CPU'S turn"}`;
+    activePlayerEl.innerHTML = `${
+      turn === PLAYER ? "PLAYER'S TURN" : "CPU'S turn"
+    }`;
   }
   return sleep(700);
 }
@@ -288,7 +318,7 @@ function placeShips(board, rows, columns, vertOrHoriz, ship) {
         ? (PLAYER_DIVS[rows * LENGTH + i].id = `${ship.key}`)
         : (CPU_DIVS[rows * LENGTH + i].id = `${ship.key}`);
       ship.firstIndex = `${rows}${columns}`;
-      board[rows][i] = 1;
+      board[rows][i] = ACTIVE_SHIP; //TODO FIX
     }
   } else {
     for (let i = rows; i < rows + ship.length; i++) {
@@ -302,7 +332,7 @@ function placeShips(board, rows, columns, vertOrHoriz, ship) {
         ? (PLAYER_DIVS[i * LENGTH + columns].id = `${ship.key}`)
         : (CPU_DIVS[i * LENGTH + columns].id = `${ship.key}`);
       ship.firstIndex = `${rows}${columns}`;
-      board[i][columns] = 1;
+      board[i][columns] = ACTIVE_SHIP;
     }
   }
 }
@@ -311,11 +341,11 @@ function placeShips(board, rows, columns, vertOrHoriz, ship) {
 async function handleMove(evt) {
   let clickedDiv = evt.target;
   if (
-    shipCounter <= 6 ||
+    shipCounter <= NUM_OF_SHIPS ||
     clickedDiv.classList.contains("miss") ||
     clickedDiv.classList.contains("hit-ship") ||
     clickedDiv.classList.contains("sunken-ship") ||
-    turn === -1 ||
+    turn === CPU ||
     winner !== null
   )
     return;
@@ -328,15 +358,18 @@ async function handleMove(evt) {
     columns = rows;
     rows = 0;
   }
-  if (CPU_BOARD[rows][columns] === 0) CPU_DIVS[divIdx].classList.add("miss");
-  if (clickedDiv.classList.contains("cpu-ship")) {
+  if (CPU_BOARD[rows][columns] === NO_SHIP) {
+    CPU_DIVS[divIdx].classList.add("miss");
+    CPU_BOARD[rows][columns] === MISS;
+  }
+  if (CPU_BOARD[rows][columns] === ACTIVE_SHIP) {
     currentShip = findCorrectShip(CPU_BOARD, clickedDiv);
-    if (!clickedDiv.classList.contains("hit-ship")) currentShip.health--;
+    currentShip.health--;
     checkIfSunk(CPU_BOARD, currentShip, clickedDiv);
     CPU_DIVS[divIdx].classList.add("hit-ship");
-    CPU_BOARD[rows][columns] = 2;
+    CPU_BOARD[rows][columns] = HIT_SHIP;
   }
-  turn = -1;
+  turn = CPU;
   await activeTurn();
 
   cpuFire(PLAYER_BOARD);
@@ -378,26 +411,26 @@ function cpuFire(board) {
     lastHitRow = rows;
     checkIfSunk(PLAYER_BOARD, currentShip, randomDiv);
     PLAYER_DIVS[randomDivIdx].classList.add("hit-ship");
-    PLAYER_BOARD[rows][columns] = 2;
+    PLAYER_BOARD[rows][columns] = HIT_SHIP;
   }
   if (PLAYER_BOARD[rows][columns] === 0) {
     randomDiv.classList.add("miss");
-    PLAYER_BOARD[rows][columns] = 3;
+    PLAYER_BOARD[rows][columns] = MISS;
   }
-  turn = 1;
+  turn = PLAYER;
   activeTurn();
 }
 
 //Finding if there is an index around the last hit div that can be fired at again
 function getSuitableIndex(board) {
   if (
-    lastHitColumn + 1 !== 10 &&
+    lastHitColumn + 1 !== HEIGHT &&
     board[lastHitRow][lastHitColumn + 1] !== 2 &&
     board[lastHitRow][lastHitColumn + 1] !== 3
   ) {
     return `${lastHitRow}${lastHitColumn + 1}`;
   } else if (
-    lastHitRow + 1 !== 10 &&
+    lastHitRow + 1 !== LENGTH &&
     board[lastHitRow + 1][lastHitColumn] !== 2 &&
     board[lastHitRow + 1][lastHitColumn] !== 3
   ) {
@@ -431,24 +464,20 @@ function findCorrectShip(board, div) {
 //Checking if the ship that was hit has been sunk
 function checkIfSunk(board, ship, div) {
   let currentPlayer = board === PLAYER_BOARD ? PLAYER_DIVS : CPU_DIVS;
-  if (ship.health === 0 && [...div.classList].includes("horizontal")) {
+  if (ship.health === 0 && div.classList.contains("horizontal")) {
     for (let i = 0; i < ship.length; i++) {
       currentPlayer[parseInt(ship.firstIndex) + i].classList.add("sunken-ship");
     }
     if (board === PLAYER_BOARD) {
-      suitableIndex = null;
-      lastHitRow = null;
-      lastHitColumn = null;
+      suitableIndex = lastHitRow = lastHitColumn = null;
     }
   }
-  if (ship.health === 0 && [...div.classList].includes("vertical")) {
-    for (let i = 0; i < ship.length * 10; i += 10) {
+  if (ship.health === 0 && div.classList.contains("vertical")) {
+    for (let i = 0; i < ship.length * HEIGHT; i += HEIGHT) {
       currentPlayer[parseInt(ship.firstIndex) + i].classList.add("sunken-ship");
     }
     if (board === PLAYER_BOARD) {
-      suitableIndex = null;
-      lastHitRow = null;
-      lastHitColumn = null;
+      suitableIndex = lastHitRow = lastHitColumn = null;
     }
   }
   getWinner(board);
@@ -457,11 +486,12 @@ function checkIfSunk(board, ship, div) {
 function getWinner(board) {
   let sunkShipsCounter = 0;
   let currentPlayer = board == PLAYER_BOARD ? playerShips : cpuShips;
-  Object.values(currentPlayer).forEach((obj) => {
+  const ships = Object.values(currentPlayer);
+  ships.forEach((obj) => {
     obj.health === 0 ? sunkShipsCounter++ : sunkShipsCounter;
   });
-  if (sunkShipsCounter === Object.keys(currentPlayer).length) {
-    winner = currentPlayer === cpuShips ? 1 : -1;
+  if (sunkShipsCounter === ships.length) {
+    winner = currentPlayer === cpuShips ? PLAYER : CPU;
     activeTurn();
   }
 }
@@ -480,7 +510,6 @@ function resetBoard(board, divs) {
   shipCounter = 0;
   verticalLabelEl.style.display = "flex";
 }
-
 
 function getRandomNum(x, y) {
   return Math.floor(Math.random() * (x - y) + y);
